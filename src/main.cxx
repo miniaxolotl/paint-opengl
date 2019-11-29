@@ -43,7 +43,7 @@ void init(int argc, char** argv)
 	// Initialize glut
     glutInit(&argc, argv); // pass in command line arguments
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
-	
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable( GL_BLEND );
 
@@ -170,6 +170,20 @@ void kb_s(int key, int x, int y)
 
 void kb(unsigned char key, int x, int y)
 {
+	if(key == 'c')
+	{
+		puts("CLEAR");
+	}
+
+	if(key == 'b')
+	{
+		puts("TOOL: BUCKET");
+	}
+
+	if(key == 'p')
+	{
+		puts("TOOL: PIXEL");
+	}
 
 } // void kb(unsigned char key, int x, int y)
 
