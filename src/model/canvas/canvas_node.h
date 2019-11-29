@@ -64,7 +64,7 @@ public:
 	void setNeighbor(CanvasNode* node, DIRECTION direction);
 private:
 	/** width of the node */
-	int width = 2/Canvas::width;
+	int width = 2/32;
 	/** height of the node */
 	int height = width;
 
