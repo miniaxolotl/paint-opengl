@@ -46,7 +46,7 @@ void init(int argc, char** argv)
 
     // places the window and defines it's size
     glutPositionWindow(0,0);
-    glutReshapeWindow(window_width*2, window_height*2);
+    glutReshapeWindow(window_width, window_height);
 
 	//glEnable(GL_LIGHT0);
 	//glEnable(GL_LIGHTING);
