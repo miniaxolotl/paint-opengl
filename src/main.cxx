@@ -29,6 +29,9 @@ bool down = false;
 bool clear = false;
 float nx,ny;
 
+unsigned short r = 0, g = 0, b = 0;
+float a = .5;
+
 unsigned int objects = 0;
 
 std::thread terminal_thread(terminal_thread_func); 
@@ -39,7 +42,10 @@ void init(int argc, char** argv)
 {
 	// Initialize glut
     glutInit(&argc, argv); // pass in command line arguments
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable( GL_BLEND );
 
     // create the window object and tell glut to use it
     int main_window = glutCreateWindow("Paint32");
@@ -109,7 +115,7 @@ void place(bool clear_flag)
 {
 	if(!clear_flag)
 	{
-		c->paint(nx, ny, 255, 204, 153);
+		c->paint(nx, ny, r, g, b, a);
 	}
 	else
 	{
@@ -173,9 +179,19 @@ void terminal_thread_func()
 
 	while(true)
 	{
-		printf("Input rgb [0-255] [0-255] [0-255]: ");
-		std::cin >> input;
+		printf("Input red [0-255]: \n");
+		std::cin >> r;
 
-		std::regex b("()()()"); // Geeks followed by any character
+		printf("Input blue [0-255]: \n");
+		std::cin >> g;
+
+		printf("Input green [0-255]: \n");
+		std::cin >> b;
+
+		// printf("Input alpha [0-255]: \n");
+		// std::cin >> a;
+
+		printf("r:%u g:%u b:%u a:%f\n", r, g, b, a);
+
 	}
 } // void terminal_thread_func()

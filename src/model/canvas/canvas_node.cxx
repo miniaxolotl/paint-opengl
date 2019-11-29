@@ -26,18 +26,16 @@ void CanvasNode::draw()
 	if(visible)
 	{
 		float q = (2.0f/Canvas::width);
-		float r = q/2;
+		float s = q/2;
 
-		glColor3f(r/255,g/255,b/255);
+		glColor4f(r/255,g/255,b/255,0.0f);
 		// glPointSize(2.5f);
 		glBegin(GL_POLYGON);
 
-		glBegin(GL_POLYGON);
-
-		glVertex2f(x-r, y-r);
-		glVertex2f(x+r, y-r);
-		glVertex2f(x+r, y+r);
-		glVertex2f(x-r, y+r);
+		glVertex2f(x-s, y-s);
+		glVertex2f(x+s, y-s);
+		glVertex2f(x+s, y+s);
+		glVertex2f(x-s, y+s);
 
 		glEnd();
 	}

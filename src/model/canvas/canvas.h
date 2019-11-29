@@ -44,7 +44,7 @@ public:
 	/** Draw the canvas background */
 	void background();
 	/** Paint a pixel onto the canvas */
-	void paint(float x, float y, unsigned short r, unsigned short g, unsigned short b);
+	void paint(float x, float y, unsigned short r, unsigned short g, unsigned short b, float a);
 	/** Clear the node at the specified coordiantes */
 	void clear(float x, float y);
 

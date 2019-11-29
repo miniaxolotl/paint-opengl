@@ -159,7 +159,7 @@ void Canvas::background()
 	}
 } // Canvas::background()
 
-void Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
+void Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b,  float a)
 {
 	// printf("%f,%f\n",x,y);
 	int x_s = ((((x+1)/2)*width));
@@ -169,7 +169,7 @@ void Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigne
 	// printf("x:%d y:%d - scaled\n",x_s,y_s);
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
-		graph[x_s][y_s]->setColor(r,g,b);
+		graph[x_s][y_s]->setColor(r,g,b,a);
 		graph[x_s][y_s]->setVisible();
 	}
 } // Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
