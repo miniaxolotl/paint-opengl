@@ -1,3 +1,7 @@
+.vscode
+bin/
+build/
+
 # Prerequisites
 *.d
 
@@ -30,7 +34,3 @@
 *.exe
 *.out
 *.app
-
-.vscode
-bin/
-buid/
