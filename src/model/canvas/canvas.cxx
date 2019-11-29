@@ -174,6 +174,20 @@ void Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigne
 	}
 } // Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
 
+void Canvas::clear(float x, float y)
+{
+	// printf("%f,%f\n",x,y);
+	int x_s = ((((x+1)/2)*width));
+	int y_s = ((((y+1)/2)*height));
+	// printf("%d,%d\n",x_s,y_s);
+
+	// printf("x:%d y:%d - scaled\n",x_s,y_s);
+	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
+	{
+		graph[x_s][y_s]->setInvisible();
+	}
+} // Canvas::paint(float x, float y)
+
 ///////////////////////////
 //	Getters
 ///////////////////////////

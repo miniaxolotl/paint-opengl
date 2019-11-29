@@ -95,7 +95,7 @@ void mouse_m(int x, int y);
 /**
  * Places down pixels
  */
-void place();
+void place(bool clear_flag);
 
 /**
  * Main loop of program

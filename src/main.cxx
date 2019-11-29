@@ -26,6 +26,7 @@ int window_width = 800;
 int window_height = 800;
 
 bool down = false;
+bool clear = false;
 float nx,ny;
 
 unsigned int objects = 0;
@@ -100,13 +101,21 @@ void update()
 
 	if(down)
 	{
-		place();
+		place(clear);
 	}
 } // void update()
 
-void place()
+void place(bool clear_flag)
 {
-	c->paint(nx, ny, 255, 204, 153);
+	if(!clear_flag)
+	{
+		c->paint(nx, ny, 255, 204, 153);
+	}
+	else
+	{
+		c->clear(nx,ny);
+	}
+	
 } // void place()
 
 void mouse(int b, int s,int x, int y)
@@ -114,6 +123,14 @@ void mouse(int b, int s,int x, int y)
 	if(b == GLUT_LEFT_BUTTON && s == GLUT_DOWN)
 	{
 		down = true;
+		clear = false;
+		nx=2*(float)x/window_width-1;
+		ny=(2*(float)y/window_height-1)*-1;
+	}
+	else if(b == GLUT_RIGHT_BUTTON && s == GLUT_DOWN)
+	{
+		down = true;
+		clear = true;
 		nx=2*(float)x/window_width-1;
 		ny=(2*(float)y/window_height-1)*-1;
 	}
@@ -121,6 +138,14 @@ void mouse(int b, int s,int x, int y)
 	if(b == GLUT_LEFT_BUTTON && s == GLUT_UP)
 	{
 		down = false;
+		clear = false;
+		nx=0;
+		ny=0;
+	}
+	else if(b == GLUT_RIGHT_BUTTON && s == GLUT_UP)
+	{
+		down = false;
+		clear = false;
 		nx=0;
 		ny=0;
 	}
