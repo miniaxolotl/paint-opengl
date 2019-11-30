@@ -70,7 +70,7 @@ void Brush::flood_fill(CanvasNode* node, int old_r, int old_g, int old_b, int ne
 		// if old node color is equal to new node color replace it
 		if(r == old_r && g == old_g && b == old_b)
 		{
-			printf("R:%d %d G:%d %d B:%d %d\n", node->getR(), r, node->getG(), g, node->getB(), b);
+			// printf("R:%d %d G:%d %d B:%d %d\n", node->getR(), r, node->getG(), g, node->getB(), b);
 
 			node->setColor(new_r,new_g,new_b);
 

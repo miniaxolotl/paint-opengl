@@ -1,4 +1,5 @@
 #include "canvas.h"
+#include "../../global.h"
 
 Canvas::Canvas() : Object::Object()
 {
@@ -137,6 +138,8 @@ void Canvas::draw()
 			graph[i][j]->draw();
 		}
 	}
+
+	brush_indicator();
 } // Canvas::draw()
 
 void Canvas::update()
@@ -148,6 +151,42 @@ void Canvas::update()
 			graph[i][j]->update();
 		}
 	}
+} // Canvas::update()
+
+void Canvas::brush_indicator()
+{		 
+
+	float radius = (.0625);
+	float radius_contrast = radius+0.0625;
+	float x = 1-radius_contrast;
+    float theta;
+
+	// int u_color = 0xbd38fb + 0xe;
+	// unsigned rIntValue = (u_color / 256 / 256) % 256;
+	// unsigned gIntValue = (u_color / 256      ) % 256;
+	// unsigned bIntValue = (u_color            ) % 256;
+	// printf("%x %u %u %u\n", u_color, rIntValue, gIntValue, bIntValue);
+
+	glColor4f(((255.0f-r)/255.0f),((255.0f-g)/255.0f),((255.0f-b)/255.0f),0.6f);
+	glBegin(GL_POLYGON);
+	// background
+	for(int i=0; i<16; i++)
+	{
+        theta = i*M_PI/8;
+        glVertex2f(radius_contrast*cos(theta)+x, radius_contrast*sin(theta)+x);
+    }
+	glEnd();
+
+	glColor4f(r/255.0f,g/255.0f,b/255.0f,0.6f);
+	glBegin(GL_POLYGON);
+	// forground
+	for(int i=0; i<16; i++)
+	{
+        theta = i*M_PI/8;
+        glVertex2f(radius*cos(theta)+x, radius*sin(theta)+x);
+    }
+	glEnd();
+
 } // Canvas::update()
 
 void Canvas::background()
@@ -233,6 +272,7 @@ void Canvas::clear(float x, float y)
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
 		graph[x_s][y_s]->setInvisible();
+		graph[x_s][y_s]->setColor(-1,-1,-1);
 	}
 } // Canvas::paint(float x, float y)
 
@@ -242,7 +282,8 @@ void Canvas::clear()
 	{
 		for(int j=0;j<height;j++)
 		{
-			graph[i][j]->setInvisible();	
+			graph[i][j]->setInvisible();
+			graph[i][j]->setColor(-1,-1,-1);
 		}
 	}
 } // Canvas::paint()

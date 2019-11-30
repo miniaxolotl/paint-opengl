@@ -29,7 +29,11 @@ bool down = false;
 bool clear = false;
 float nx,ny;
 
-unsigned short r = 0, g = 0, b = 0;
+unsigned int r = 0, g = 0, b = 0;
+unsigned int rgb_hex = 0xffffff;
+
+int rgb = 0;
+
 float a = .5;
 
 unsigned int objects = 0;
@@ -44,12 +48,13 @@ void init(int argc, char** argv)
     glutInit(&argc, argv); // pass in command line arguments
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable( GL_BLEND );
 
     // create the window object and tell glut to use it
     int main_window = glutCreateWindow("Paint32");
     glutSetWindow(main_window);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // places the window and defines it's size
     glutPositionWindow(0,0);
@@ -65,6 +70,7 @@ void init(int argc, char** argv)
 
     glutDisplayFunc(draw);
 	glutMouseFunc(mouse);
+	// glutMouseWheelFunc(mouse_w);
 	glutMotionFunc(mouse_m);
 	glutSpecialFunc(kb_s);
 	glutKeyboardFunc(kb);
@@ -155,7 +161,43 @@ void mouse(int b, int s,int x, int y)
 		nx=0;
 		ny=0;
 	}
+	
+	if(b == 3) // up
+	{
+		if(rgb == 0) { rgb_hex += 0x080000; }
+		if(rgb == 1) { rgb_hex += 0x000800; }
+		if(rgb == 2) { rgb_hex += 0x000016; }
+		
+		r = (rgb_hex / 256 / 256) % 256;
+		g = (rgb_hex / 256      ) % 256;
+		b = (rgb_hex            ) % 256;
+	}
+	else if(b == 4) // down
+	{		
+		if(rgb == 0) { rgb_hex -= 0x080000; }
+		if(rgb == 1) { rgb_hex -= 0x000800; }
+		if(rgb == 2) { rgb_hex -= 0x000016; }
+		
+		r = (rgb_hex / 256 / 256) % 256;
+		g = (rgb_hex / 256      ) % 256;
+		b = (rgb_hex            ) % 256;
+	}
+
+	// printf("%x r:%u g:%u b:%u\n", rgb_hex, r, g, b);
 } // void mouse_f(int b, int s,int x, int y)
+
+
+void mouse_w(int button, int dir, int x, int y)
+{
+	if (dir > 0)
+    {
+        // Zoom in
+    }
+    else
+    {
+        // Zoom out
+    }
+} // mouse_w(int button, int dir, int x, int y)
 
 void mouse_m(int x, int y)
 {
@@ -170,22 +212,36 @@ void kb_s(int key, int x, int y)
 
 void kb(unsigned char key, int x, int y)
 {
-	if(key == 'c')
-	{
-		c->clear();
-		puts("CLEAR");
-	}
 
-	if(key == 'b')
+	switch(key)
 	{
-		c->set_tool(BRUSH_TYPE::FLOOD);
-		puts("TOOL: BUCKET");
-	}
+		case 'c':
+			c->clear();
+			puts("CLEAR");
+			break;
 
-	if(key == 'p')
-	{
-		c->set_tool(BRUSH_TYPE::PIXEL);
-		puts("TOOL: PIXEL");
+		case 'b':
+			c->set_tool(BRUSH_TYPE::FLOOD);
+			puts("TOOL: BUCKET");
+			break;
+
+		case 'p':
+			c->set_tool(BRUSH_TYPE::PIXEL);
+			puts("TOOL: PIXEL");
+			break;
+
+		case '1':
+			rgb = 0;
+			break;
+		case '2':
+			rgb = 1;
+			break;
+		case '3':
+			rgb = 2;
+			break;
+		
+		default:
+			break;
 	}
 
 } // void kb(unsigned char key, int x, int y)
@@ -196,19 +252,11 @@ void terminal_thread_func()
 
 	while(true)
 	{
-		printf("Input red [0-255]: \n");
-		std::cin >> r;
-
-		printf("Input blue [0-255]: \n");
-		std::cin >> g;
-
-		printf("Input green [0-255]: \n");
-		std::cin >> b;
-
-		// printf("Input alpha [0-255]: \n");
-		// std::cin >> a;
-
-		printf("r:%u g:%u b:%u a:%f\n", r, g, b, a);
-
+		// printf("Input rgb values [0-255] [0-255] [0-255]: ");
+		// scanf ("%u",&r);
+		// scanf ("%u",&g);
+		// scanf ("%u",&b);
+		
+    	// getchar(); // clear input buffer on error 
 	}
 } // void terminal_thread_func()

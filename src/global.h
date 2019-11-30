@@ -35,6 +35,8 @@ extern int window_height;
 extern unsigned int objects;
 /** Thread for handling terminal inputs */
 extern std::thread terminal_thread;
+/** RGB values */
+extern unsigned int r, g, b;
 
 
 ///////////////////////////////////////////////////////
@@ -84,6 +86,11 @@ void kb(unsigned char key, int x, int y);
  * @param y
  */
 void mouse(int button, int s, int x, int y);
+
+/**
+ * 
+ */
+void mouse_w(int button, int dir, int x, int y);
 
 /**
  * Captures mouse movement

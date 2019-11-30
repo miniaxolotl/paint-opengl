@@ -7,11 +7,15 @@
 
 CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 {
-	float q = (2.0f/Canvas::width);
-	float r = q/2;
+	float s = (2.0f/Canvas::width);
+	float t= s/2;
 	
-	x = x_val+r;
-	y = y_val+r;
+	x = x_val+t;
+	y = y_val+t;
+
+	r=-1;
+	g=-1;
+	b=-1;
 } // CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 
 CanvasNode::~CanvasNode()
