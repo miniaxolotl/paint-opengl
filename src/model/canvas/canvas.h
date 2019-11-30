@@ -13,6 +13,7 @@
 
 #include "canvas_node.h"
 #include "../../type/brush_type.h"
+#include "../brush/brush.h"
 #include "../../type/direction_type.h"
 
 /**
@@ -44,9 +45,12 @@ public:
 	/** Draw the canvas background */
 	void background();
 	/** Paint a pixel onto the canvas */
-	void paint(float x, float y, unsigned short r, unsigned short g, unsigned short b, float a);
+	void paint(float x, float y, int r, int g, int b, int a);
 	/** Clear the node at the specified coordiantes */
 	void clear(float x, float y);
+	/** Clear the whole canvas */
+	void clear();
+	
 
 	/* Variables */
 	
@@ -69,9 +73,14 @@ public:
 	//	Setters
 	///////////////////////////
 
+	/** Set the brush type */
+	void set_tool(BRUSH_TYPE type);
+	
 private:
 	/** Graph representation of a canvas */
 	CanvasNode*** graph;
+	Brush brush;
+	BRUSH_TYPE brush_type;
 };
 
 #endif // CANVAS_H

@@ -23,21 +23,57 @@ Canvas::Canvas() : Object::Object()
 	{
 		for(int j=0;j<height;j++)
 		{
-			// North node
-			if(j-1>0) { graph[i][j]->setNeighbor(graph[i][j-1], DIRECTION::NORTH); }
-			else { graph[i][j]->setNeighbor(NULL, DIRECTION::NORTH); }
+			// NOrth node
+			if(j+1 < height)
+			{
+				if(graph[i][j+1] == NULL)
+				{
+					graph[i][j]->setLink(NULL, DIRECTION::NORTH);
+				}
+				else
+				{
+					graph[i][j]->setLink(graph[i][j+1], DIRECTION::NORTH);
+				}
+			}
 
 			// South node
-			if(j+1<height) { graph[i][j]->setNeighbor(graph[i][j+1], DIRECTION::SOUTH); }
-			else { graph[i][j]->setNeighbor(NULL, DIRECTION::SOUTH); }
+			if(j-1 >= 0)
+			{
+				if(graph[i][j-1] == NULL)
+				{
+					graph[i][j]->setLink(NULL, DIRECTION::SOUTH);
+				}
+				else
+				{
+					graph[i][j]->setLink(graph[i][j-1], DIRECTION::SOUTH);
+				}
+			}
 
 			// East node
-			if(i+1<width) { graph[i][j]->setNeighbor(graph[i+1][j], DIRECTION::EAST); }
-			else { graph[i][j]->setNeighbor(NULL, DIRECTION::EAST); }
+			if(i+1 < width)
+			{
+				if(graph[i+1][j] == NULL)
+				{
+					graph[i][j]->setLink(NULL, DIRECTION::EAST);
+				}
+				else
+				{
+					graph[i][j]->setLink(graph[i+1][j], DIRECTION::EAST);
+				}
+			}
 
 			// West node
-			if(i-1>0) { graph[i][j]->setNeighbor(graph[i-1][j], DIRECTION::WEST); }
-			else { graph[i][j]->setNeighbor(NULL, DIRECTION::WEST); }
+			if(i-1 >= 0)
+			{
+				if(graph[i-1][j] == NULL)
+				{
+					graph[i][j]->setLink(NULL, DIRECTION::WEST);
+				}
+				else
+				{
+					graph[i][j]->setLink(graph[i-1][j], DIRECTION::WEST);
+				}
+			}
 		}
 	}
 } // Canvas::Canvas() : Object::Object()
@@ -159,18 +195,30 @@ void Canvas::background()
 	}
 } // Canvas::background()
 
-void Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b,  float a)
+void Canvas::paint(float x, float y, int r, int g, int b, int a)
 {
-	// printf("%f,%f\n",x,y);
 	int x_s = ((((x+1)/2)*width));
 	int y_s = ((((y+1)/2)*height));
-	// printf("%d,%d\n",x_s,y_s);
 
-	// printf("x:%d y:%d - scaled\n",x_s,y_s);
+	CanvasNode* node = NULL;
+
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
-		graph[x_s][y_s]->setColor(r,g,b,a);
-		graph[x_s][y_s]->setVisible();
+		node = graph[x_s][y_s];
+
+		switch (brush_type)
+		{
+		case BRUSH_TYPE::PIXEL:
+			brush.pixel(node,r,g,b);
+			break;
+
+		case BRUSH_TYPE::FLOOD:
+			brush.flood_fill(node,r,g,b);
+			break;
+
+		default:
+			break;
+		}
 	}
 } // Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
 
@@ -188,6 +236,17 @@ void Canvas::clear(float x, float y)
 	}
 } // Canvas::paint(float x, float y)
 
+void Canvas::clear()
+{
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<height;j++)
+		{
+			graph[i][j]->setInvisible();	
+		}
+	}
+} // Canvas::paint()
+
 ///////////////////////////
 //	Getters
 ///////////////////////////
@@ -198,3 +257,8 @@ CanvasNode*** Canvas::getGraph() {return graph; } // Canvas::getGraph()
 ///////////////////////////
 //	Setters
 ///////////////////////////
+
+void Canvas::set_tool(BRUSH_TYPE type)
+{
+	brush_type = type;
+}

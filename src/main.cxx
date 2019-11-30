@@ -172,16 +172,19 @@ void kb(unsigned char key, int x, int y)
 {
 	if(key == 'c')
 	{
+		c->clear();
 		puts("CLEAR");
 	}
 
 	if(key == 'b')
 	{
+		c->set_tool(BRUSH_TYPE::FLOOD);
 		puts("TOOL: BUCKET");
 	}
 
 	if(key == 'p')
 	{
+		c->set_tool(BRUSH_TYPE::PIXEL);
 		puts("TOOL: PIXEL");
 	}
 

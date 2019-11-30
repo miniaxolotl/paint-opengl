@@ -41,19 +41,22 @@ public:
 	/** Set the rgb value of the node  */
 	void paint(unsigned short r, unsigned short g, unsigned short b);
 
-	/** Get the neighbor of the node in the specified direction */
-	void getLink(DIRECTION direction);
-
 	///////////////////////////
 	//	Getters
 	///////////////////////////
+
+	/** Get the neighbor of the node in the specified direction */
+	CanvasNode* getLink(DIRECTION direction);
+
+	/** Get visibility flag */
+	bool isVisible();
 
 	///////////////////////////
 	//	Setters
 	///////////////////////////
 
 	/** Set the color of the node */
-	void setColor(float r, float g, float b, float a = 0);
+	void setColor(int r, int g, int b, int a = 0);
 
 	/** Set the node as visible */
 	void setVisible() { visible = true; }
@@ -61,7 +64,12 @@ public:
 	void setInvisible() { visible = false; }
 
 	/** Set the neightbor of the node in the specified direction */
-	void setNeighbor(CanvasNode* node, DIRECTION direction);
+	void setLink(CanvasNode* node, DIRECTION direction);
+
+	int getR() { return r; }
+	int getG() { return g; }
+	int getB() { return b; }
+	int getA() { return a; }
 private:
 	/** width of the node */
 	int width = 2/32;
@@ -81,13 +89,13 @@ private:
 	bool visible = false;
 
 	/** Red level */
-	float r;
+	int r;
 	/** Green level */
-	float g;
+	int g;
 	/** Blue level */
-	float b;
+	int b;
 	/** Alpha level */
-	float a;
+	int a;
 
 	/** x location of node */
 	float x;
