@@ -44,6 +44,8 @@ public:
 	
 	/** Draw the canvas background */
 	void background();
+	/** Draws rainbow spectrum strip */
+	void color_indicator();
 	/** draw the brush */
 	void brush_indicator();
 	/** Paint a pixel onto the canvas */

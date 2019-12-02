@@ -140,6 +140,7 @@ void Canvas::draw()
 	}
 
 	brush_indicator();
+	color_indicator();
 } // Canvas::draw()
 
 void Canvas::update()
@@ -153,9 +154,22 @@ void Canvas::update()
 	}
 } // Canvas::update()
 
+void Canvas::color_indicator()
+{
+	float x0 = -1, x1 = 1, y0 = -1, y1 = 1;
+
+	for(int i=0;i<width*2;i++)
+	glBegin(GL_POLYGON);
+    glVertex2f(x0,y0+((y1/height)/2));
+    glVertex2f(x1,y0+((y1/height)/2));
+    glVertex2f(x1,y0);
+    glVertex2f(x0,y0);
+    glEnd();    
+	glEnd();
+}
+
 void Canvas::brush_indicator()
 {		 
-
 	float radius = (.0625);
 	float radius_contrast = radius+0.0625;
 	float x = 1-radius_contrast;
