@@ -36,7 +36,8 @@ extern unsigned int objects;
 /** Thread for handling terminal inputs */
 extern std::thread terminal_thread;
 /** RGB values */
-extern unsigned int r, g, b;
+extern float rgb[];
+void HSVtoRGB(int H, float output[3],double S = 1, double V = 1);
 
 
 ///////////////////////////////////////////////////////
@@ -79,6 +80,14 @@ void kb_s(int key, int x, int y);
 void kb(unsigned char key, int x, int y);
 
 /**
+ * Captures normal keyboard keys
+ * @param key
+ * @param x 
+ * @param y
+ */
+void kb_up(unsigned char key, int x, int y);
+
+/**
  * Captures mouse buttons
  * @param button 
  * @param s
@@ -98,6 +107,13 @@ void mouse_w(int button, int dir, int x, int y);
  * @param y
  */
 void mouse_m(int x, int y);
+
+/**
+ * Captures mouse movement
+ * @param x
+ * @param y
+ */
+void mouse_p(int x, int y);
 
 /**
  * Places down pixels

@@ -153,19 +153,41 @@ void Canvas::update()
 		}
 	}
 } // Canvas::update()
-
+ 
 void Canvas::color_indicator()
 {
 	float x0 = -1, x1 = 1, y0 = -1, y1 = 1;
 
-	for(int i=0;i<width*2;i++)
-	glBegin(GL_POLYGON);
-    glVertex2f(x0,y0+((y1/height)/2));
-    glVertex2f(x1,y0+((y1/height)/2));
-    glVertex2f(x1,y0);
-    glVertex2f(x0,y0);
-    glEnd();    
-	glEnd();
+	float i_b = 0;
+	float i_g = 0;
+	float i_r = 0;
+
+	float rgb[3];
+
+	int i = 0;
+
+	// int q = width * 2;
+
+	for(i=0;i<360;i++)
+	{
+		// HSVtoRGB(i*(360/q),1,1,rgb);
+		HSVtoRGB(i*6,rgb);
+
+		// printf("r:%f g:%f b:%f\n", rgb[0], rgb[1], rgb[2]);
+		
+		double x0 = ((float)i/width)-1; // start
+		double x1 = (((float)i/width)-1)+((float)1/width); // end
+		double y0 = ((float)1/height)-1;
+		double y1 = -1;
+
+		glColor3f(rgb[0],rgb[1],rgb[2]);
+		glBegin(GL_POLYGON);
+		glVertex2f(x0,y0);
+		glVertex2f(x1,y0);
+		glVertex2f(x1,y1);
+		glVertex2f(x0,y1);
+		glEnd();    
+	}
 }
 
 void Canvas::brush_indicator()
@@ -181,7 +203,7 @@ void Canvas::brush_indicator()
 	// unsigned bIntValue = (u_color            ) % 256;
 	// printf("%x %u %u %u\n", u_color, rIntValue, gIntValue, bIntValue);
 
-	glColor4f(((255.0f-r)/255.0f),((255.0f-g)/255.0f),((255.0f-b)/255.0f),0.6f);
+	glColor4f(rgb[0], rgb[1], rgb[2],0.4f);
 	glBegin(GL_POLYGON);
 	// background
 	for(int i=0; i<16; i++)
@@ -191,7 +213,7 @@ void Canvas::brush_indicator()
     }
 	glEnd();
 
-	glColor4f(r/255.0f,g/255.0f,b/255.0f,0.6f);
+	glColor4f(rgb[0],rgb[1],rgb[2],0.6f);
 	glBegin(GL_POLYGON);
 	// forground
 	for(int i=0; i<16; i++)
@@ -248,7 +270,7 @@ void Canvas::background()
 	}
 } // Canvas::background()
 
-void Canvas::paint(float x, float y, int r, int g, int b, int a)
+void Canvas::paint(float x, float y, float r, float g, float b, float a)
 {
 	int x_s = ((((x+1)/2)*width));
 	int y_s = ((((y+1)/2)*height));

@@ -22,7 +22,7 @@ void Brush::update()
 
 } // Brush::update()
 
-void Brush::flood_fill(CanvasNode* node, int r, int g, int b)
+void Brush::flood_fill(CanvasNode* node, float r, float g, float b)
 {
 	if(node == NULL)
 	{
@@ -37,7 +37,7 @@ void Brush::flood_fill(CanvasNode* node, int r, int g, int b)
 	return;
 } // Brush::flood_fill(CanvasNode* node)
 
-void Brush::flood_fill(CanvasNode* node, int old_r, int old_g, int old_b, int new_r, int new_g, int new_b)
+void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, float new_r, float new_g, float new_b)
 {
 	// return if node does not exist
 	if(node == NULL)
@@ -84,7 +84,7 @@ void Brush::flood_fill(CanvasNode* node, int old_r, int old_g, int old_b, int ne
 	return;
 } // Brush::flood_fill(CanvasNode* node)
 
-void Brush::pixel(CanvasNode* node, int r, int g, int b)
+void Brush::pixel(CanvasNode* node, float r, float g, float b)
 {
 	node->setColor(r,g,b);
 	node->setVisible();

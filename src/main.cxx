@@ -28,11 +28,10 @@ int window_height = 800;
 bool down = false;
 bool clear = false;
 float nx,ny;
-
-unsigned int r = 0, g = 0, b = 0;
+bool ctrl = false;
+float rgb[3] = { 54/255, 1, 1 };
+unsigned int h = 180;
 unsigned int rgb_hex = 0xffffff;
-
-int rgb = 0;
 
 float a = .5;
 
@@ -72,8 +71,10 @@ void init(int argc, char** argv)
 	glutMouseFunc(mouse);
 	// glutMouseWheelFunc(mouse_w);
 	glutMotionFunc(mouse_m);
+	glutPassiveMotionFunc(mouse_p);
 	glutSpecialFunc(kb_s);
 	glutKeyboardFunc(kb);
+	glutKeyboardUpFunc(kb_up);
 	glutIdleFunc(main_loop);
 	glutMainLoop();
 
@@ -119,11 +120,11 @@ void update()
 
 void place(bool clear_flag)
 {
-	if(!clear_flag)
+	if(!clear_flag & !ctrl)
 	{
-		c->paint(nx, ny, r, g, b, a);
+		c->paint(nx, ny, rgb[0], rgb[1], rgb[2], a);
 	}
-	else
+	else if (clear_flag)
 	{
 		c->clear(nx,ny);
 	}
@@ -162,30 +163,24 @@ void mouse(int b, int s,int x, int y)
 		ny=0;
 	}
 	
+	float z = (360/128); 
 	if(b == 3) // up
 	{
-		if(rgb == 0) { rgb_hex += 0x080000; }
-		if(rgb == 1) { rgb_hex += 0x000800; }
-		if(rgb == 2) { rgb_hex += 0x000016; }
-		
-		r = (rgb_hex / 256 / 256) % 256;
-		g = (rgb_hex / 256      ) % 256;
-		b = (rgb_hex            ) % 256;
+		if(h+z <= 360)
+		{
+			h += z;
+			HSVtoRGB(h, rgb);
+		}
 	}
 	else if(b == 4) // down
 	{		
-		if(rgb == 0) { rgb_hex -= 0x080000; }
-		if(rgb == 1) { rgb_hex -= 0x000800; }
-		if(rgb == 2) { rgb_hex -= 0x000016; }
-		
-		r = (rgb_hex / 256 / 256) % 256;
-		g = (rgb_hex / 256      ) % 256;
-		b = (rgb_hex            ) % 256;
+		if(h-z >= 0)
+		{
+			h -= z;
+			HSVtoRGB(h, rgb);
+		}
 	}
-
-	// printf("%x r:%u g:%u b:%u\n", rgb_hex, r, g, b);
 } // void mouse_f(int b, int s,int x, int y)
-
 
 void mouse_w(int button, int dir, int x, int y)
 {
@@ -201,13 +196,39 @@ void mouse_w(int button, int dir, int x, int y)
 
 void mouse_m(int x, int y)
 {
+	if(ctrl)
+	{
+		HSVtoRGB((nx+1)*(360.0f/2), rgb);
+	}
+} // void mouse_m_f(int x, int y)
+
+void mouse_p(int x, int y)
+{
 	nx=2*(float)x/window_width-1;
 	ny=(2*(float)y/window_height-1)*-1;
+
+	if(ctrl)
+	{
+		HSVtoRGB((nx+1)*(360.0f/2), rgb);
+	}
 } // void mouse_m_f(int x, int y)
 
 void kb_s(int key, int x, int y)
 {
-
+	// printf("KEYCODE: %d\n", key);
+	switch (key)
+	{
+	case 114:
+		
+		break;
+	
+	case 115:
+		/* code */
+		break;
+	
+	default:
+		break;
+	}
 } // void kb_s(int key, int x, int y)
 
 void kb(unsigned char key, int x, int y)
@@ -215,6 +236,9 @@ void kb(unsigned char key, int x, int y)
 
 	switch(key)
 	{
+		case 'x':
+			ctrl = true;
+			break;
 		case 'c':
 			c->clear();
 			puts("CLEAR");
@@ -225,26 +249,27 @@ void kb(unsigned char key, int x, int y)
 			puts("TOOL: BUCKET");
 			break;
 
-		case 'p':
+		case 'v':
 			c->set_tool(BRUSH_TYPE::PIXEL);
 			puts("TOOL: PIXEL");
 			break;
 
-		case '1':
-			rgb = 0;
-			break;
-		case '2':
-			rgb = 1;
-			break;
-		case '3':
-			rgb = 2;
-			break;
-		
 		default:
 			break;
 	}
 
 } // void kb(unsigned char key, int x, int y)
+
+void kb_up(unsigned char key, int x, int y)
+{
+
+	switch(key)
+	{
+		case 'x':
+			ctrl = false;
+			break;
+	}
+}
 
 void terminal_thread_func()
 {
@@ -252,11 +277,57 @@ void terminal_thread_func()
 
 	while(true)
 	{
-		// printf("Input rgb values [0-255] [0-255] [0-255]: ");
-		// scanf ("%u",&r);
-		// scanf ("%u",&g);
-		// scanf ("%u",&b);
+		printf("Input rgb values [0-255] [0-255] [0-255]: ");
+		scanf ("%f",&rgb[0]);
+		scanf ("%f",&rgb[1]);
+		scanf ("%f",&rgb[2]);
 		
-    	// getchar(); // clear input buffer on error 
+    	getchar(); // clear input buffer on error 
 	}
 } // void terminal_thread_func()
+
+void HSVtoRGB(int H, float output[3],double S, double V) {
+	double C = S * V;
+	double X = C * (1 - abs(fmod(H / 60.0, 2) - 1));
+	double m = V - C;
+	double Rs, Gs, Bs;
+
+	if(H >= 0 && H < 60) {
+		Rs = C;
+		Gs = X;
+		Bs = 0;	
+	}
+	else if(H >= 60 && H < 120) {	
+		Rs = X;
+		Gs = C;
+		Bs = 0;	
+	}
+	else if(H >= 120 && H < 180) {
+		Rs = 0;
+		Gs = C;
+		Bs = X;	
+	}
+	else if(H >= 180 && H < 240) {
+		Rs = 0;
+		Gs = X;
+		Bs = C;	
+	}
+	else if(H >= 240 && H < 300) {
+		Rs = X;
+		Gs = 0;
+		Bs = C;	
+	}
+	else {
+		Rs = C;
+		Gs = 0;
+		Bs = X;	
+	}
+	
+	// output[0] = (Rs + m) * 255;
+	// output[1] = (Gs + m) * 255;
+	// output[2] = (Bs + m) * 255;
+
+	output[0] = (Rs + m);
+	output[1] = (Gs + m);
+	output[2] = (Bs + m);
+}

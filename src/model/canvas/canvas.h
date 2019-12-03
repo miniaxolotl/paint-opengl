@@ -49,7 +49,7 @@ public:
 	/** draw the brush */
 	void brush_indicator();
 	/** Paint a pixel onto the canvas */
-	void paint(float x, float y, int red, int green, int blue, int alpha);
+	void paint(float x, float y, float red, float green, float blue, float alpha);
 	/** Clear the node at the specified coordiantes */
 	void clear(float x, float y);
 	/** Clear the whole canvas */

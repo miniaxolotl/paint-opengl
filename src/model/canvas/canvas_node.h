@@ -39,7 +39,7 @@ public:
     void update();
 
 	/** Set the rgb value of the node  */
-	void paint(unsigned short r, unsigned short g, unsigned short b);
+	void paint(float r, float g, float b);
 
 	///////////////////////////
 	//	Getters
@@ -56,7 +56,7 @@ public:
 	///////////////////////////
 
 	/** Set the color of the node */
-	void setColor(int r, int g, int b, int a = 0);
+	void setColor(float r, float g, float b, float a = 0);
 
 	/** Set the node as visible */
 	void setVisible() { visible = true; }
@@ -89,13 +89,13 @@ private:
 	bool visible = false;
 
 	/** Red level */
-	int r;
+	float r;
 	/** Green level */
-	int g;
+	float g;
 	/** Blue level */
-	int b;
+	float b;
 	/** Alpha level */
-	int a;
+	float a;
 
 	/** x location of node */
 	float x;

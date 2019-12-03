@@ -32,7 +32,7 @@ void CanvasNode::draw()
 		float q = (2.0f/Canvas::width);
 		float s = q/2;
 
-		glColor4f(r/255.0f,g/255.0f,b/255.0f,1.0f);
+		glColor4f(r,g,b,1.0f);
 		// glPointSize(2.5f);
 		glBegin(GL_POLYGON);
 
@@ -50,7 +50,7 @@ void CanvasNode::update()
 
 } // CanvasNode::update()
 
-void CanvasNode::paint(unsigned short r, unsigned short g, unsigned short b)
+void CanvasNode::paint(float r, float g, float b)
 {
 
 } // CanvasNode::paint(unsigned short r, unsigned short g, unsigned short b)
@@ -95,7 +95,7 @@ bool CanvasNode::isVisible()
 //	Setters
 ///////////////////////////
 
-void CanvasNode::setColor(int red, int green, int blue, int alpha)
+void CanvasNode::setColor(float red, float green, float blue, float alpha)
 {
 	r = red;
 	g = green;
