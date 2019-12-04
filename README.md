@@ -3,12 +3,15 @@ Simple paint application.
 
 - [Paint32](#paint32)
 - [Getting Started](#getting-started)
+- [Usage](#usage)
+	- [Hotkeys](#hotkeys)
+	- [Screenshots](#screenshots)
+	- [Documentation:](#documentation)
 - [Credits](#credits)
 	- [Dependancies:](#dependancies)
 	- [Libraries & Sources:](#libraries--sources)
-	- [Documentation:](#documentation)
-- [Authors](#authors)
-- [License](#license)
+	- [Authors](#authors)
+	- [License](#license)
 
 # Getting Started
 1. **Install all [dependacies](#dependancies) & [libraries](#libraries--sources).**
@@ -22,6 +25,27 @@ Simple paint application.
 
 	```make run``` - Run the program.
 
+# Usage
+
+## Hotkeys
+
+|Key|Action
+|---|---
+|Left Mouse|Draw
+|Right Mouse|Erase
+|x|Activate color slider
+|c|Clear canvas
+|v|Pixel draw tool
+|b|Bucket tool
+
+## Screenshots
+![](res/repo/bucket_0.png =100x)
+![](res/repo/bucket_1.png =100x)
+
+## Documentation:
+
+`TODO`
+
 # Credits
 
 ## Dependancies:
@@ -32,12 +56,8 @@ Simple paint application.
 - FreeGLUT
 - GLU (OpenGL Utility Librarry)
 
-## Documentation:
+## Authors
+Ya boy [Elias Mawa](https://github.com/CeruleanSong)
 
-`TODO`
-
-# Authors
-Elias Mawa
-
-# License
+## License
 Under [GPL-3.0 Liecence](/LICENSE)
