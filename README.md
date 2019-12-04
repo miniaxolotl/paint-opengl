@@ -48,12 +48,12 @@ Simple paint application.
 
 **Bucket Fill Tool**
 
-<img src="res/repo/bucket_0.png" width=300>
-<img src="res/repo/bucket_1.png" width=300>
+
+<img src="res/repo/bucket_0.png" width=200> <img src="res/repo/bucket_1.png" width=200>
 
 **Pixel Tool**
 
-<img src="res/repo/sword.png" width=300>
+<img src="res/repo/sword.png" width=200>
 
 ## Documentation:
 
