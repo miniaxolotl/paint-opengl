@@ -196,6 +196,9 @@ void mouse_w(int button, int dir, int x, int y)
 
 void mouse_m(int x, int y)
 {
+	nx=2*(float)x/window_width-1;
+	ny=(2*(float)y/window_height-1)*-1;
+	
 	if(ctrl)
 	{
 		HSVtoRGB((nx+1)*(360.0f/2), rgb);
