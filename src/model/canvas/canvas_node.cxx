@@ -14,7 +14,7 @@ CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 	y = y_val+t;
 
 	// empty rgb val
-	r, g, b=-1;
+	r = -1, g = -1, b = -1;
 } // CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 
 CanvasNode::~CanvasNode()

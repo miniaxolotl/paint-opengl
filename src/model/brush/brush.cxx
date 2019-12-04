@@ -7,6 +7,7 @@
  */
 
 #include "brush.h"
+#include <thread>
 
 Brush::Brush()
 {
@@ -32,6 +33,7 @@ void Brush::update()
 
 void Brush::flood_fill(CanvasNode* node, float r, float g, float b)
 {
+
 	if(node == NULL)
 	{
 		return;
@@ -47,19 +49,30 @@ void Brush::flood_fill(CanvasNode* node, float r, float g, float b)
 
 void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, float new_r, float new_g, float new_b)
 {
+	std::chrono::milliseconds dura(15);
+
 	// return if node does not exist
-	if(node == NULL)
+	if(node == NULL || kill)
 	{
 		return;
 	}
 	else
 	{
+		
 		int r = node->getR(), g = node->getG(), b = node->getB();
 
 		// make node visible if it's invisible
 		if(!node->isVisible())
 		{
+			// for demo
+			if(slowmode) 
+			{ 
+				std::this_thread::sleep_for(dura);
+			}
+
 			node->setVisible();
+
+			node->setColor(new_r,new_g,new_b);
 
 			flood_fill(node->getLink(DIRECTION::NORTH), old_r, old_g, old_b, new_r, new_g, new_b);
 			flood_fill(node->getLink(DIRECTION::EAST), old_r, old_g, old_b, new_r, new_g, new_b);
@@ -78,7 +91,11 @@ void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, 
 		// if old node color is equal to new node color replace it
 		if(r == old_r && g == old_g && b == old_b)
 		{
-			// printf("R:%d %d G:%d %d B:%d %d\n", node->getR(), r, node->getG(), g, node->getB(), b);
+			// for demo
+			if(slowmode) 
+			{
+				std::this_thread::sleep_for(dura);
+			}
 
 			node->setColor(new_r,new_g,new_b);
 

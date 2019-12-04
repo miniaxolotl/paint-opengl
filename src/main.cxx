@@ -9,12 +9,19 @@
  */
 #include "global.h"
 #include "model/canvas/canvas.h"
+#include <queue>
 
 /******************************************************
  * VARIABLES
  ******************************************************/
 
 unsigned int objects = 0;
+
+bool kill = false;
+bool slowmode = false;
+// std::thread paint_thread(place);
+std::queue<std::thread> paint_thread;
+
 Canvas* c = new Canvas();
 
 int window_width = 800;
@@ -118,21 +125,27 @@ void update()
 
 	if(mouse_active)
 	{
-		place(mouse_right);
+		// place();
+		paint_thread.push(std::thread(place));
 	}
 } // void update()
 
-void place(bool clear_flag)
+void place()
 {
-	if(!clear_flag & !x_key)
-	{
-		c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
-	}
-	else if(clear_flag)
-	{
-		c->clear(mouse_x, mouse_y);
-	}
-	
+	// while(true)
+	// {
+		if(!mouse_right && !x_key && mouse_active)
+		{
+			// printf("%d %d %d\n", rgb[0], rgb[1], rgb[2]);
+			// printf("%f %f\n", mouse_x, mouse_y);
+			c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
+			puts("fin");
+		}
+		else if(mouse_right)
+		{
+			c->clear(mouse_x, mouse_y);
+		}
+	// }
 } // void place()
 
 void mouse(int button, int state, int x, int y)
@@ -250,8 +263,10 @@ void kb(unsigned char key, int x, int y)
 		case 'x':
 			x_key = true;
 			break;
+
 		case 'c':
 			c->clear();
+			kill = true;
 			puts("CLEAR");
 			break;
 
@@ -263,6 +278,10 @@ void kb(unsigned char key, int x, int y)
 		case 'v':
 			c->set_tool(BRUSH_TYPE::PIXEL);
 			puts("TOOL: PIXEL");
+			break;
+
+		case 's':
+			slowmode = !slowmode;
 			break;
 
 		default:
@@ -278,6 +297,11 @@ void kb_up(unsigned char key, int x, int y)
 	{
 		case 'x':
 			x_key = false;
+			break;
+
+		case 'c':
+			kill = false;
+			c->clear();
 			break;
 	}
 }

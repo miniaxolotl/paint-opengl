@@ -30,8 +30,12 @@
 //
 ///////////////////////////////////////////////////////
 
-/** NUmber of objects in program */
+/** Number of objects in program */
 extern unsigned int objects;
+/** Flag for slowmode */
+extern bool slowmode;
+/** thread kill switch */
+extern bool kill;
 
 /** Thread for handling terminal inputs */
 extern std::thread terminal_thread;
@@ -143,9 +147,8 @@ void mouse_p(int x, int y);
 
 /**
  * Function that handles pixel drawing events.
- * @param clear_flag Flag for drawing or erasing operation.
  */
-void place(bool clear_flag);
+void place();
 
 /**
  * Main loop of program.
