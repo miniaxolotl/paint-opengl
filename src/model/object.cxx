@@ -2,8 +2,8 @@
  * object.cxx
  * Implmentation object template class
  * Author:		Elias Mawa
- * Created on: 	Oct 16, 2019
- * Last Edit:	Oct 16, 2019
+ * Created on: 	10-16-2019
+ * Last Edit:	10-16-2019
  */
 
 #include "object.h"

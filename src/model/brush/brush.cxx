@@ -1,3 +1,11 @@
+/**
+ * brush.css
+ * Implementation of brush painting algorithims.
+ * Author:		Elias Mawa
+ * Created on: 	10-16-2019
+ * Last Edit:	12-04-2019
+ */
+
 #include "brush.h"
 
 Brush::Brush()
