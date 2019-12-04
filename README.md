@@ -27,20 +27,33 @@ Simple paint application.
 
 # Usage
 
+**Changing Colors** - There are two ways to change colors.
+1. You can use the scroll wheel.
+2. Press the x key while, slding the mouse on the x axis.
+
+
 ## Hotkeys
 
 |Key|Action
 |---|---
 |Left Mouse|Draw
 |Right Mouse|Erase
+|Scroll Wheel|Modify Color
 |x|Activate color slider
 |c|Clear canvas
 |v|Pixel draw tool
 |b|Bucket tool
 
 ## Screenshots
-![](res/repo/bucket_0.png | width=100)
-![](res/repo/bucket_1.png =100x)
+
+**Bucket Fill Tool**
+
+<img src="res/repo/bucket_0.png" width=300>
+<img src="res/repo/bucket_1.png" width=300>
+
+**Pixel Tool**
+
+<img src="res/repo/sword.png" width=300>
 
 ## Documentation:
 
