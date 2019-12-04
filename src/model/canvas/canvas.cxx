@@ -209,9 +209,9 @@ void Canvas::background()
 	glEnd();
 
 	// Draw a checkerd background ontop of solid background.
-	for(int i=0;i<32;i++)
+	for(int i=0;i<width;i++)
 	{
-		for(int j=0;j<32;j++)
+		for(int j=0;j<height;j++)
 		{
 			GLfloat k=0.0f+i, l=0.0f+j;
 
@@ -220,10 +220,10 @@ void Canvas::background()
 				glColor3f(192/COLORS,192/COLORS,192/COLORS);
 				glBegin(GL_POLYGON);
 
-				glVertex2f(((k/16)-1),((l/16)-1));
-				glVertex2f(((k/16)-1)+q,((l/16)-1));
-				glVertex2f(((k/16)-1)+q,((l/16)-1)+q);
-				glVertex2f(((k/16)-1),((l/16)-1)+q);
+				glVertex2f(((k/(width/2))-1),((l/(height/2))-1));
+				glVertex2f(((k/(width/2))-1)+q,((l/(height/2))-1));
+				glVertex2f(((k/(width/2))-1)+q,((l/(height/2))-1)+q);
+				glVertex2f(((k/(width/2))-1),((l/(height/2))-1)+q);
 
 				glEnd();
 				s=!s;
