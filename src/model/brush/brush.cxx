@@ -8,6 +8,7 @@
 
 #include "brush.h"
 #include <thread>
+#include <stdlib.h>
 
 Brush::Brush()
 {
@@ -91,29 +92,26 @@ void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, 
 
 void Brush::pixel(CanvasNode* node, float r, float g, float b)
 {
-	if(node->getLink(DIRECTION::EAST))
-	{
-		node->getLink(DIRECTION::EAST)->setColor(r,g,b);
-		node->getLink(DIRECTION::EAST)->setVisible();
-	}
-	if(node->getLink(DIRECTION::SOUTH))
-	{
-		node->getLink(DIRECTION::SOUTH)->setColor(r,g,b);
-		node->getLink(DIRECTION::SOUTH)->setVisible();
-	}
-	if(node->getLink(DIRECTION::NORTH))
-	{
-		node->getLink(DIRECTION::NORTH)->setColor(r,g,b);
-		node->getLink(DIRECTION::NORTH)->setVisible();
-	}
-	if(node->getLink(DIRECTION::WEST))
-	{
-		node->getLink(DIRECTION::WEST)->setColor(r,g,b);
-		node->getLink(DIRECTION::WEST)->setVisible();
-	}
+	pixel(node, r, g, b, pixel_size);
+} // Brush::pixel(CanvasNode* node)
 
-	node->setColor(r,g,b);
-	node->setVisible();
+void Brush::pixel(CanvasNode* node, float r, float g, float b, int size)
+{
+	if(node == NULL || size < 1)
+	{
+		return;
+	}
+	else
+	{
+		node->setColor(r,g,b);
+		node->setVisible();
+
+		pixel(node->getLink(DIRECTION::NORTH), r, g, b, size-1);
+		pixel(node->getLink(DIRECTION::EAST), r, g, b, size-1);
+		pixel(node->getLink(DIRECTION::SOUTH), r, g, b, size-1);
+		pixel(node->getLink(DIRECTION::WEST), r, g, b, size-1);
+
+	}
 } // Brush::pixel(CanvasNode* node)
 
 ///////////////////////////

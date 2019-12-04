@@ -51,6 +51,8 @@ extern int window_height;
 extern int rgb[];
 /** Alpha value */
 extern float alpha;
+/** Pixel size */
+extern int pixel_size;
 /** Colorspace */
 extern const float COLORS;
 

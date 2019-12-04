@@ -37,6 +37,8 @@ public:
 	void flood_fill(CanvasNode* node, float r, float g, float b, float rn, float gn, float bn);
 	/** Single pixel brush */
 	void pixel(CanvasNode* node, float r, float g, float b);
+	/** Brush helper */
+	void pixel(CanvasNode* node, float r, float g, float b, int size);
 
 	///////////////////////////
 	//	Getters

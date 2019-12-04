@@ -32,8 +32,9 @@ bool mouse_active = false, mouse_left = false, mouse_right = false, x_key = fals
 float mouse_x = 0, mouse_y = 0;
 
 // color values
-int rgb[3] = { 255, 255, 255 };
+int rgb[3] = { 0, 0, 0 };
 float alpha = 1;
+int pixel_size = 1;
 const float COLORS = 255.0f;
 unsigned int hsv_hue = 180;
 
@@ -139,7 +140,6 @@ void place()
 			// printf("%d %d %d\n", rgb[0], rgb[1], rgb[2]);
 			// printf("%f %f\n", mouse_x, mouse_y);
 			c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
-			puts("fin");
 		}
 		else if(mouse_right)
 		{
@@ -219,7 +219,7 @@ void mouse_m(int x, int y)
 {
 	mouse_x = (2*(float)x/window_width-1);
 	mouse_y = (2*(float)y/window_height-1)*-1;
-	
+
 	// if user is scrolling colors
 	if(x_key)
 	{
@@ -257,7 +257,6 @@ void kb_s(int key, int x, int y)
 
 void kb(unsigned char key, int x, int y)
 {
-
 	switch(key)
 	{
 		case 'x':
@@ -282,6 +281,24 @@ void kb(unsigned char key, int x, int y)
 
 		case 's':
 			slowmode = !slowmode;
+			break;
+
+		case '-':
+			if(pixel_size-1 > 0)
+			{
+				pixel_size--;
+			}
+			break;
+
+		case '+':
+			if(pixel_size+1 < 5)
+			{
+				pixel_size++;
+			}
+			break;
+
+		case '=':
+			pixel_size = 1;
 			break;
 
 		default:
