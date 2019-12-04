@@ -39,7 +39,7 @@ Simple paint application.
 |b|Bucket tool
 
 ## Screenshots
-![](res/repo/bucket_0.png =100x)
+![](res/repo/bucket_0.png | width=100)
 ![](res/repo/bucket_1.png =100x)
 
 ## Documentation:
