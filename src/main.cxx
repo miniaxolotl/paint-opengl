@@ -288,10 +288,11 @@ void terminal_thread_func()
 
 	while(true)
 	{
-		printf("Input rgb values [0-255] [0-255] [0-255]: ");
-		scanf ("%f",&rgb[0]);
-		scanf ("%f",&rgb[1]);
-		scanf ("%f",&rgb[2]);
+		printf("Input rgba values [0-255] [0-255] [0-255] [0-1]: ");
+		scanf ("%d",&rgb[0]);
+		scanf ("%d",&rgb[1]);
+		scanf ("%d",&rgb[2]);
+		scanf ("%f",&alpha);
 		
     	getchar(); // clear input buffer on error 
 	}
