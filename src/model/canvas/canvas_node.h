@@ -2,8 +2,8 @@
  * canvas_node.h
  * Node (pixel) in a canvas
  * Author:		Elias Mawa
- * Created on: 	Oct 16, 2019
- * Last Edit:	Oct 16, 2019
+ * Created on: 	10-16-2019
+ * Last Edit:	12-04-2019
  */
 
 #ifndef CANVAS_NODE_H
@@ -39,7 +39,7 @@ public:
     void update();
 
 	/** Set the rgb value of the node  */
-	void paint(float r, float g, float b);
+	void paint(int r, int g, int b);
 
 	///////////////////////////
 	//	Getters
@@ -55,15 +55,25 @@ public:
 	//	Setters
 	///////////////////////////
 
-	/** Set the color of the node */
-	void setColor(float r, float g, float b, float a = 0);
+	/** 
+	 * Set the color of the node
+	 * @param red Red value.
+	 * @param green Green value.
+	 * @param blue Blue value.
+	 * @param alpha Alpha value.
+	 **/
+	void setColor(int red, int green, int blue, float alpha = 1.0f);
 
 	/** Set the node as visible */
 	void setVisible() { visible = true; }
 	/** Set the node as invisible */
 	void setInvisible() { visible = false; }
 
-	/** Set the neightbor of the node in the specified direction */
+	/**
+	 * Set the neightbor of the node in the specified direction
+	 * @param node The node that is going to be connected.
+	 * @param direction The direction the node is in.
+	 **/
 	void setLink(CanvasNode* node, DIRECTION direction);
 
 	int getR() { return r; }
@@ -89,11 +99,11 @@ private:
 	bool visible = false;
 
 	/** Red level */
-	float r;
+	int r;
 	/** Green level */
-	float g;
+	int g;
 	/** Blue level */
-	float b;
+	int b;
 	/** Alpha level */
 	float a;
 

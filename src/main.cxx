@@ -5,10 +5,34 @@
  * @date 10-16-2019
  * Author:		Elias Mawa
  * Created on: 	10-16-2019
- * Last Edit:	11-29-2019
+ * Last Edit:	12-03-2019
  */
 #include "global.h"
 #include "model/canvas/canvas.h"
+
+/******************************************************
+ * VARIABLES
+ ******************************************************/
+
+unsigned int objects = 0;
+Canvas* c = new Canvas();
+
+int window_width = 800;
+int window_height = 800;
+
+// KEY FLAGS
+bool mouse_active = false, mouse_left = false, mouse_right = false, x_key = false;
+float mouse_x = 0, mouse_y = 0;
+
+// color values
+int rgb[3] = { 255, 255, 255 };
+float alpha = 1;
+const float COLORS = 255.0f;
+unsigned int hsv_hue = 180;
+
+/******************************************************
+ * 	MAIN
+ ******************************************************/
 
 int main(int argc, char** argv)
 {
@@ -19,27 +43,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
-/** Variables **/
-Canvas* c = new Canvas();
-
-int window_width = 800;
-int window_height = 800;
-
-bool down = false;
-bool clear = false;
-float nx,ny;
-bool ctrl = false;
-float rgb[3] = { 54/255, 1, 1 };
-unsigned int h = 180;
-unsigned int rgb_hex = 0xffffff;
-
-float a = .5;
-
-unsigned int objects = 0;
-
-std::thread terminal_thread(terminal_thread_func); 
-
-/** Functions **/
+/******************************************************
+ * 	FUNCTIONS
+ ******************************************************/
 
 void init(int argc, char** argv)
 {
@@ -64,8 +70,6 @@ void init(int argc, char** argv)
 	//glEnable(GL_DEPTH_TEST);
 
 	glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-
-	// glutTimerFunc(1000/60, timer, 0);
 
     glutDisplayFunc(draw);
 	glutMouseFunc(mouse);
@@ -112,72 +116,76 @@ void update()
 	window_width = glutGet(GLUT_WINDOW_WIDTH);
 	window_height = glutGet(GLUT_WINDOW_HEIGHT);
 
-	if(down)
+	if(mouse_active)
 	{
-		place(clear);
+		place(mouse_right);
 	}
 } // void update()
 
 void place(bool clear_flag)
 {
-	if(!clear_flag & !ctrl)
+	if(!clear_flag & !x_key)
 	{
-		c->paint(nx, ny, rgb[0], rgb[1], rgb[2], a);
+		c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
 	}
-	else if (clear_flag)
+	else if(clear_flag)
 	{
-		c->clear(nx,ny);
+		c->clear(mouse_x, mouse_y);
 	}
 	
 } // void place()
 
-void mouse(int b, int s,int x, int y)
+void mouse(int button, int state, int x, int y)
 {
-	if(b == GLUT_LEFT_BUTTON && s == GLUT_DOWN)
+	/* KEY PRESSES */
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		down = true;
-		clear = false;
-		nx=2*(float)x/window_width-1;
-		ny=(2*(float)y/window_height-1)*-1;
+		mouse_active = true;
+		mouse_right = false;
+		mouse_x = (2*(float)x/window_width-1);
+		mouse_y = (2*(float)y/window_height-1)*-1;
 	}
-	else if(b == GLUT_RIGHT_BUTTON && s == GLUT_DOWN)
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
-		down = true;
-		clear = true;
-		nx=2*(float)x/window_width-1;
-		ny=(2*(float)y/window_height-1)*-1;
+		mouse_active = true;
+		mouse_right = true;
+		mouse_x = (2*(float)x/window_width-1);
+		mouse_y = (2*(float)y/window_height-1)*-1;
 	}
 
-	if(b == GLUT_LEFT_BUTTON && s == GLUT_UP)
+	/* KEY RELEASES */
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
-		down = false;
-		clear = false;
-		nx=0;
-		ny=0;
+		mouse_active = false;
+		mouse_left = false;
+		mouse_x=0;
+		mouse_y=0;
 	}
-	else if(b == GLUT_RIGHT_BUTTON && s == GLUT_UP)
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 	{
-		down = false;
-		clear = false;
-		nx=0;
-		ny=0;
+		mouse_active = false;
+		mouse_right = false;
+		mouse_x=0;
+		mouse_y=0;
 	}
 	
-	float z = (360/128); 
-	if(b == 3) // up
+	/* MOUSE SCROLLING */
+	// hue delta
+	float hsv_mod = (360/128);
+	if(button == 3) // scroll up
 	{
-		if(h+z <= 360)
+		if(hsv_hue + hsv_mod <= 360)
 		{
-			h += z;
-			HSVtoRGB(h, rgb);
+			hsv_hue += hsv_mod;
+			HSVtoRGB(hsv_hue, rgb);
 		}
 	}
-	else if(b == 4) // down
+	else if(button == 4) // scroll down
 	{		
-		if(h-z >= 0)
+		if(hsv_hue - hsv_mod >= 0)
 		{
-			h -= z;
-			HSVtoRGB(h, rgb);
+			hsv_hue -= hsv_mod;
+			HSVtoRGB(hsv_hue, rgb);
 		}
 	}
 } // void mouse_f(int b, int s,int x, int y)
@@ -196,37 +204,37 @@ void mouse_w(int button, int dir, int x, int y)
 
 void mouse_m(int x, int y)
 {
-	nx=2*(float)x/window_width-1;
-	ny=(2*(float)y/window_height-1)*-1;
+	mouse_x = (2*(float)x/window_width-1);
+	mouse_y = (2*(float)y/window_height-1)*-1;
 	
-	if(ctrl)
+	// if user is scrolling colors
+	if(x_key)
 	{
-		HSVtoRGB((nx+1)*(360.0f/2), rgb);
+		HSVtoRGB((mouse_x+1)*(360.0f/2), rgb);
 	}
 } // void mouse_m_f(int x, int y)
 
 void mouse_p(int x, int y)
 {
-	nx=2*(float)x/window_width-1;
-	ny=(2*(float)y/window_height-1)*-1;
+	mouse_x=2*(float)x/window_width-1;
+	mouse_y=(2*(float)y/window_height-1)*-1;
 
-	if(ctrl)
+	if(x_key)
 	{
-		HSVtoRGB((nx+1)*(360.0f/2), rgb);
+		HSVtoRGB((mouse_x+1)*(360.0f/2), rgb);
 	}
 } // void mouse_m_f(int x, int y)
 
 void kb_s(int key, int x, int y)
 {
-	// printf("KEYCODE: %d\n", key);
 	switch (key)
 	{
 	case 114:
-		
+		// ctrl
 		break;
 	
 	case 115:
-		/* code */
+		// alt
 		break;
 	
 	default:
@@ -240,7 +248,7 @@ void kb(unsigned char key, int x, int y)
 	switch(key)
 	{
 		case 'x':
-			ctrl = true;
+			x_key = true;
 			break;
 		case 'c':
 			c->clear();
@@ -269,7 +277,7 @@ void kb_up(unsigned char key, int x, int y)
 	switch(key)
 	{
 		case 'x':
-			ctrl = false;
+			x_key = false;
 			break;
 	}
 }
@@ -289,7 +297,7 @@ void terminal_thread_func()
 	}
 } // void terminal_thread_func()
 
-void HSVtoRGB(int H, float output[3],double S, double V) {
+void HSVtoRGB(int H, int output[3],double S, double V) {
 	double C = S * V;
 	double X = C * (1 - abs(fmod(H / 60.0, 2) - 1));
 	double m = V - C;
@@ -325,12 +333,8 @@ void HSVtoRGB(int H, float output[3],double S, double V) {
 		Gs = 0;
 		Bs = X;	
 	}
-	
-	// output[0] = (Rs + m) * 255;
-	// output[1] = (Gs + m) * 255;
-	// output[2] = (Bs + m) * 255;
 
-	output[0] = (Rs + m);
-	output[1] = (Gs + m);
-	output[2] = (Bs + m);
+	output[0] = (Rs + m) * 255;
+	output[1] = (Gs + m) * 255;
+	output[2] = (Bs + m) * 255;
 }

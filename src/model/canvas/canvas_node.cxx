@@ -8,14 +8,13 @@
 CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 {
 	float s = (2.0f/Canvas::width);
-	float t= s/2;
+	float t = s/2;
 	
 	x = x_val+t;
 	y = y_val+t;
 
-	r=-1;
-	g=-1;
-	b=-1;
+	// empty rgb val
+	r, g, b=-1;
 } // CanvasNode::CanvasNode(float x_val, float y_val) : Object::Object()
 
 CanvasNode::~CanvasNode()
@@ -32,8 +31,8 @@ void CanvasNode::draw()
 		float q = (2.0f/Canvas::width);
 		float s = q/2;
 
-		glColor4f(r,g,b,1.0f);
-		// glPointSize(2.5f);
+		glColor4f(r/COLORS, g/COLORS, b/COLORS, alpha);
+		
 		glBegin(GL_POLYGON);
 
 		glVertex2f(x-s, y-s);
@@ -50,7 +49,7 @@ void CanvasNode::update()
 
 } // CanvasNode::update()
 
-void CanvasNode::paint(float r, float g, float b)
+void CanvasNode::paint(int r, int g, int b)
 {
 
 } // CanvasNode::paint(unsigned short r, unsigned short g, unsigned short b)
@@ -95,7 +94,7 @@ bool CanvasNode::isVisible()
 //	Setters
 ///////////////////////////
 
-void CanvasNode::setColor(float red, float green, float blue, float alpha)
+void CanvasNode::setColor(int red, int green, int blue, float alpha)
 {
 	r = red;
 	g = green;

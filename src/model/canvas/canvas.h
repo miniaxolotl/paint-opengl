@@ -3,7 +3,7 @@
  * Wrapper for drawing and modifying a canvas.
  * Author:		Elias Mawa
  * Created on: 	10-16-2019
- * Last Edit:	11-29-2019
+ * Last Edit:	12-04-2019
  */
 
 #ifndef CANVAS_H
@@ -45,16 +45,15 @@ public:
 	/** Draw the canvas background */
 	void background();
 	/** Draws rainbow spectrum strip */
-	void color_indicator();
+	void color_bar();
 	/** draw the brush */
 	void brush_indicator();
 	/** Paint a pixel onto the canvas */
-	void paint(float x, float y, float red, float green, float blue, float alpha);
+	void paint(float x, float y, int red, int green, int blue, float alpha);
 	/** Clear the node at the specified coordiantes */
 	void clear(float x, float y);
 	/** Clear the whole canvas */
 	void clear();
-	
 
 	/* Variables */
 	

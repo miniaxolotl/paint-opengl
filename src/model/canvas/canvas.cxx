@@ -1,3 +1,11 @@
+/**
+ * canvas.cxx
+ * Implementation of canvas class.
+ * Author:		Elias Mawa
+ * Created on: 	10-16-2019
+ * Last Edit:	12-04-2019
+ */
+
 #include "canvas.h"
 #include "../../global.h"
 
@@ -81,44 +89,7 @@ Canvas::Canvas() : Object::Object()
 
 Canvas::Canvas(int w, int h) : Object::Object()
 {
-	// // Generate all nodes
-	// graph = new CanvasNode**[w];
-	// for(int i=0;i<w;i++)
-	// {
-	// 	graph[i] = new CanvasNode*[h];
-	// }
-
-	// // Instantiate all nodes
-	// for(int i=0;i<w;i++)
-	// {
-	// 	for(int j=0;j<h;j++)
-	// 	{
-	// 		graph[i][j] = new CanvasNode();
-	// 	}
-	// }
-
-	// // Set all the node pointers
-	// for(int i=0;i<w;i++)
-	// {
-	// 	for(int j=0;j<h;j++)
-	// 	{
-	// 		// North node
-	// 		if(j-1>0) { graph[i][j]->setNeighbor(graph[i][j-1], DIRECTION::NORTH); }
-	// 		else { graph[i][j-1]->setNeighbor(NULL, DIRECTION::NORTH); }
-
-	// 		// South node
-	// 		if(j+1>0) { graph[i][j]->setNeighbor(graph[i][j+1], DIRECTION::SOUTH); }
-	// 		else { graph[i][j+1]->setNeighbor(NULL, DIRECTION::SOUTH); }
-
-	// 		// East node
-	// 		if(i+1>0) { graph[i][j]->setNeighbor(graph[i+1][j], DIRECTION::EAST); }
-	// 		else { graph[i+1][j]->setNeighbor(NULL, DIRECTION::EAST); }
-
-	// 		// West node
-	// 		if(i-1>0) { graph[i][j]->setNeighbor(graph[i-1][j], DIRECTION::WEST); }
-	// 		else { graph[i-1][j]->setNeighbor(NULL, DIRECTION::WEST); }
-	// 	}
-	// }
+	// TODO
 } // Canvas::Canvas(int w, int h) : Object::Object()
 
 Canvas::~Canvas()
@@ -140,11 +111,12 @@ void Canvas::draw()
 	}
 
 	brush_indicator();
-	color_indicator();
+	color_bar();
 } // Canvas::draw()
 
 void Canvas::update()
 {
+	// Update all nodes
 	for(int i=0;i<width;i++)
 	{
 		for(int j=0;j<height;j++)
@@ -154,33 +126,27 @@ void Canvas::update()
 	}
 } // Canvas::update()
  
-void Canvas::color_indicator()
+void Canvas::color_bar()
 {
+	/* Viewport bounds */
 	float x0 = -1, x1 = 1, y0 = -1, y1 = 1;
 
-	float i_b = 0;
-	float i_g = 0;
-	float i_r = 0;
-
-	float rgb[3];
-
-	int i = 0;
-
+	/* RGB Values */
+	int rgb_val[3] = { 0, 0 ,0 };
 	// int q = width * 2;
 
-	for(i=0;i<360;i++)
+	for(int i=0;i<360;i++)
 	{
 		// HSVtoRGB(i*(360/q),1,1,rgb);
-		HSVtoRGB(i*6,rgb);
-
-		// printf("r:%f g:%f b:%f\n", rgb[0], rgb[1], rgb[2]);
+		HSVtoRGB(i*6,rgb_val);
 		
-		double x0 = ((float)i/width)-1; // start
-		double x1 = (((float)i/width)-1)+((float)1/width); // end
+		double x0 = ((float)i/width)-1;
+		double x1 = (((float)i/width)-1)+((float)1/width);
 		double y0 = ((float)1/height)-1;
 		double y1 = -1;
 
-		glColor3f(rgb[0],rgb[1],rgb[2]);
+		// Draw rainbow sliver
+		glColor3f(rgb_val[0]/COLORS,rgb_val[1]/COLORS,rgb_val[2]/COLORS);
 		glBegin(GL_POLYGON);
 		glVertex2f(x0,y0);
 		glVertex2f(x1,y0);
@@ -192,34 +158,34 @@ void Canvas::color_indicator()
 
 void Canvas::brush_indicator()
 {		 
-	float radius = (.0625);
-	float radius_contrast = radius+0.0625;
-	float x = 1-radius_contrast;
+	/** radius of small indicator */
+	float radius = ( .03125 );
+	/** radius of large indicator */
+	float radius_contrast = radius+0.03125;
+	float x = -1+radius_contrast;
+	float y = -1+radius_contrast+((float)1/height);
     float theta;
 
-	// int u_color = 0xbd38fb + 0xe;
-	// unsigned rIntValue = (u_color / 256 / 256) % 256;
-	// unsigned gIntValue = (u_color / 256      ) % 256;
-	// unsigned bIntValue = (u_color            ) % 256;
-	// printf("%x %u %u %u\n", u_color, rIntValue, gIntValue, bIntValue);
+	/* Background object */
+	glColor4f(rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS,0.3f);
 
-	glColor4f(rgb[0], rgb[1], rgb[2],0.4f);
 	glBegin(GL_POLYGON);
-	// background
+
 	for(int i=0; i<16; i++)
 	{
         theta = i*M_PI/8;
-        glVertex2f(radius_contrast*cos(theta)+x, radius_contrast*sin(theta)+x);
+        glVertex2f(radius_contrast*cos(theta)+x, radius_contrast*sin(theta)+y);
     }
 	glEnd();
 
-	glColor4f(rgb[0],rgb[1],rgb[2],0.6f);
+	/* Foreground object */
+	glColor4f(rgb[0]/COLORS,rgb[1]/COLORS,rgb[2]/COLORS,7.0f);
+
 	glBegin(GL_POLYGON);
-	// forground
 	for(int i=0; i<16; i++)
 	{
         theta = i*M_PI/8;
-        glVertex2f(radius*cos(theta)+x, radius*sin(theta)+x);
+        glVertex2f(radius*cos(theta)+x, radius*sin(theta)+y);
     }
 	glEnd();
 
@@ -227,12 +193,12 @@ void Canvas::brush_indicator()
 
 void Canvas::background()
 {
-	float q = (2.0f/Canvas::width);
-	float r = q/2.0f;
-	bool s = true;
+	float q = (2.0f/Canvas::width); // checker size
+	bool s = true; // Flag for checkered style
 
-	// whole background
-	glColor3f(220/255.0f,220/255.0f,220/255.0f);
+	// Draw solid background
+	glColor3f(220/COLORS,220/COLORS,220/COLORS);
+
 	glBegin(GL_POLYGON);
 
 	glVertex2f(-1,-1);
@@ -242,6 +208,7 @@ void Canvas::background()
 
 	glEnd();
 
+	// Draw a checkerd background ontop of solid background.
 	for(int i=0;i<32;i++)
 	{
 		for(int j=0;j<32;j++)
@@ -250,7 +217,7 @@ void Canvas::background()
 
 			if(s)
 			{
-				glColor3f(192/255.0f,192/255.0f,192/255.0f);
+				glColor3f(192/COLORS,192/COLORS,192/COLORS);
 				glBegin(GL_POLYGON);
 
 				glVertex2f(((k/16)-1),((l/16)-1));
@@ -270,41 +237,40 @@ void Canvas::background()
 	}
 } // Canvas::background()
 
-void Canvas::paint(float x, float y, float r, float g, float b, float a)
+void Canvas::paint(float x, float y, int r, int g, int b, float a)
 {
+	// Calculate node index in array.
 	int x_s = ((((x+1)/2)*width));
 	int y_s = ((((y+1)/2)*height));
 
-	CanvasNode* node = NULL;
-
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
-		node = graph[x_s][y_s];
+		// Pointer to the specified node.
+		CanvasNode* node = graph[x_s][y_s];
 
 		switch (brush_type)
 		{
-		case BRUSH_TYPE::PIXEL:
-			brush.pixel(node,r,g,b);
-			break;
+			case BRUSH_TYPE::PIXEL:
+				brush.pixel(node,r,g,b);
+				break;
 
-		case BRUSH_TYPE::FLOOD:
-			brush.flood_fill(node,r,g,b);
-			break;
+			case BRUSH_TYPE::FLOOD:
+				brush.flood_fill(node,r,g,b);
+				break;
 
-		default:
-			break;
+			default:
+				break;
 		}
 	}
 } // Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
 
 void Canvas::clear(float x, float y)
 {
-	// printf("%f,%f\n",x,y);
+	// Calculate node index in array.
 	int x_s = ((((x+1)/2)*width));
 	int y_s = ((((y+1)/2)*height));
-	// printf("%d,%d\n",x_s,y_s);
 
-	// printf("x:%d y:%d - scaled\n",x_s,y_s);
+	// Clear the node at the speified x & y.
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
 		graph[x_s][y_s]->setInvisible();
@@ -314,6 +280,7 @@ void Canvas::clear(float x, float y)
 
 void Canvas::clear()
 {
+	// Clear all ndoes in graph.
 	for(int i=0;i<width;i++)
 	{
 		for(int j=0;j<height;j++)
@@ -322,7 +289,7 @@ void Canvas::clear()
 			graph[i][j]->setColor(-1,-1,-1);
 		}
 	}
-} // Canvas::paint()
+} // Canvas::clear()
 
 ///////////////////////////
 //	Getters
