@@ -62,31 +62,27 @@ void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, 
 		int r = node->getR(), g = node->getG(), b = node->getB();
 
 		// if replacement color is same as old color, return
-		if(r == new_r && g == new_g && b == new_b)
+		if(r == new_r && g == new_g && b == new_b && node->isVisible())
 		{
 			return;
 		}
-
-		// for demo
-		if(slowmode) 
-		{ 
-			std::this_thread::sleep_for(dura);
-		}
 		
 		// if old node color is equal to new node color replace it
-		if((r == old_r && g == old_g && b == old_b) || !node->isVisible())
+		if((r == old_r && g == old_g && b == old_b) || (!node->isVisible() && (r == old_r && g == old_g && b == old_b)))
 		{
+
+			// for demo
+			if(slowmode) { std::this_thread::sleep_for(dura); }
+
 			node->setVisible();
-
 			node->setColor(new_r,new_g,new_b);
-
-			flood_fill(node->getLink(DIRECTION::EAST), old_r, old_g, old_b, new_r, new_g, new_b);
+			
 			flood_fill(node->getLink(DIRECTION::NORTH), old_r, old_g, old_b, new_r, new_g, new_b);
+			flood_fill(node->getLink(DIRECTION::EAST), old_r, old_g, old_b, new_r, new_g, new_b);
 			flood_fill(node->getLink(DIRECTION::SOUTH), old_r, old_g, old_b, new_r, new_g, new_b);
 			flood_fill(node->getLink(DIRECTION::WEST), old_r, old_g, old_b, new_r, new_g, new_b);
-		}	
+		}
 	}
-
 	return;
 } // Brush::flood_fill(CanvasNode* node)
 
