@@ -135,11 +135,16 @@ void Canvas::update()
 			graph[i][j]->update();
 		}
 	}
+
+	// Process incremental flood fill step each frame
+	if(brush.is_filling())
+	{
+		brush.flood_fill_step(slowmode ? 5 : 200);
+	}
 } // Canvas::update()
  
 void Canvas::color_bar()
 {
-	/* RGB Values */
 	int rgb_val[3] = { 0, 0 ,0 };
 	float bar_height = 0.06f;
 	float bar_y = -1.0f;
@@ -158,6 +163,87 @@ void Canvas::color_bar()
 		glVertex2f(x1, bar_y);
 		glVertex2f(x1, bar_y + bar_height);
 		glVertex2f(x0, bar_y + bar_height);
+		glEnd();    
+	}
+
+	// Draw border around hue bar
+	glColor4f(0.3f, 0.3f, 0.3f, 1.0f);
+	glLineWidth(2.0f);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(-1.0f, bar_y);
+	glVertex2f(1.0f, bar_y);
+	glVertex2f(1.0f, bar_y + bar_height);
+	glVertex2f(-1.0f, bar_y + bar_height);
+	glEnd();
+
+	// Draw hue indicator triangle
+	float hue_pos = (hsv_hue / 360.0f) * 2.0f - 1.0f;
+	float indicator_size = 0.025f;
+	glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
+	glBegin(GL_TRIANGLES);
+	glVertex2f(hue_pos, bar_y + bar_height + indicator_size);
+	glVertex2f(hue_pos - indicator_size * 0.7f, bar_y + bar_height);
+	glVertex2f(hue_pos + indicator_size * 0.7f, bar_y + bar_height);
+	glEnd();
+
+	// Draw saturation/value square above hue bar
+	float sv_size = 0.25f;
+	float sv_x = 0.75f;
+	float sv_y = bar_y + bar_height + 0.02f;
+
+	// Draw SV gradient
+	for(int sy = 0; sy < (int)(sv_size * 200); sy++)
+	{
+		for(int sx = 0; sx < (int)(sv_size * 200); sx++)
+		{
+			float s = (float)sx / (sv_size * 200);
+			float v = (float)sy / (sv_size * 200);
+			HSVtoRGB(hsv_hue, rgb_val, s, v);
+			
+			double px0 = sv_x + (double)sx / (sv_size * 200) * sv_size;
+			double px1 = sv_x + (double)(sx + 1) / (sv_size * 200) * sv_size;
+			double py0 = sv_y + (double)sy / (sv_size * 200) * sv_size;
+			double py1 = sv_y + (double)(sy + 1) / (sv_size * 200) * sv_size;
+
+			glColor3f(rgb_val[0]/COLORS, rgb_val[1]/COLORS, rgb_val[2]/COLORS);
+			glBegin(GL_POLYGON);
+			glVertex2f(px0, py0);
+			glVertex2f(px1, py0);
+			glVertex2f(px1, py1);
+			glVertex2f(px0, py1);
+			glEnd();
+		}
+	}
+
+	// Draw border around SV square
+	glColor4f(0.3f, 0.3f, 0.3f, 1.0f);
+	glLineWidth(2.0f);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(sv_x, sv_y);
+	glVertex2f(sv_x + sv_size, sv_y);
+	glVertex2f(sv_x + sv_size, sv_y + sv_size);
+	glVertex2f(sv_x, sv_y + sv_size);
+	glEnd();
+
+	// Draw saturation/value indicator circle
+	float sv_ind_x = sv_x + hsv_saturation * sv_size;
+	float sv_ind_y = sv_y + hsv_value * sv_size;
+	float ind_radius = 0.008f;
+	glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
+	glBegin(GL_POLYGON);
+	for(int i = 0; i < 16; i++)
+	{
+		float theta = i * M_PI / 8;
+		glVertex2f(ind_radius * cos(theta) + sv_ind_x, ind_radius * sin(theta) + sv_ind_y);
+	}
+	glEnd();
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glBegin(GL_LINE_LOOP);
+	for(int i = 0; i < 16; i++)
+	{
+		float theta = i * M_PI / 8;
+		glVertex2f(ind_radius * cos(theta) + sv_ind_x, ind_radius * sin(theta) + sv_ind_y);
+	}
 	glEnd();
 }
 
@@ -259,11 +345,11 @@ void Canvas::paint(float x, float y, int r, int g, int b, float a)
 		switch (brush_type)
 		{
 			case BRUSH_TYPE::PIXEL:
-				brush.pixel(node, r, g, b, a);
+				brush.pixel(node, (float)r, (float)g, (float)b, a);
 				break;
 
 			case BRUSH_TYPE::FLOOD:
-				brush.flood_fill(node, r, g, b, a);
+				brush.flood_fill_start(node, (float)r, (float)g, (float)b, a);
 				break;
 
 			default:
@@ -307,3 +393,12 @@ void Canvas::clear()
 CanvasNode*** Canvas::getGraph() {return graph; }
 
 BRUSH_TYPE Canvas::get_tool() { return brush_type; }
+
+///////////////////////////
+//	Setters
+///////////////////////////
+
+void Canvas::set_tool(BRUSH_TYPE type)
+{
+	brush_type = type;
+}

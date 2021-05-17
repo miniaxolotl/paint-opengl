@@ -1,5 +1,5 @@
 /**
- * brush.css
+ * brush.cxx
  * Implementation of brush painting algorithims.
  * Author:		Elias Mawa
  * Created on: 	10-16-2019
@@ -7,19 +7,17 @@
  */
 
 #include "brush.h"
-#include <queue>
-#include <set>
 #include <chrono>
 #include <thread>
 
-Brush::Brush()
+Brush::Brush() : ff_active(false)
 {
 
 }
 
 Brush::~Brush()
 {
-
+	cancel_fill();
 }
 
 /* Functions */
@@ -34,69 +32,73 @@ void Brush::update()
 
 } // Brush::update()
 
-void Brush::flood_fill(CanvasNode* node, float r, float g, float b, float a)
+void Brush::flood_fill_start(CanvasNode* node, float r, float g, float b, float a)
 {
+	cancel_fill();
+
 	if(node == NULL)
 	{
 		return;
 	}
-	else
-	{
-		float old_r = node->getR(), old_g = node->getG(), old_b = node->getB();
-		float old_a = node->getA();
 
-		flood_fill(node, old_r, old_g, old_b, old_a, r, g, b, a);
-	}
-	return;
-} // Brush::flood_fill(CanvasNode* node)
+	ff_old_r = node->getR();
+	ff_old_g = node->getG();
+	ff_old_b = node->getB();
+	ff_old_a = node->getA();
 
-void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, float old_a, float new_r, float new_g, float new_b, float new_a)
-{
-	std::chrono::milliseconds dura(25);
-
-	if(node == NULL || kill)
-	{
-		return;
-	}
+	ff_new_r = r;
+	ff_new_g = g;
+	ff_new_b = b;
+	ff_new_a = a;
 
 	// If replacement color is same as old color, nothing to do
-	if(node->isVisible() && node->getR() == new_r && node->getG() == new_g && node->getB() == new_b && node->getA() == new_a)
+	if(node->isVisible() && ff_old_r == ff_new_r && ff_old_g == ff_new_g && ff_old_b == ff_new_b && ff_old_a == ff_new_a)
 	{
 		return;
 	}
 
 	// If starting node doesn't match old color, nothing to do
-	if(!(node->getR() == old_r && node->getG() == old_g && node->getB() == old_b && node->getA() == old_a))
+	if(!(node->getR() == ff_old_r && node->getG() == ff_old_g && node->getB() == ff_old_b && node->getA() == ff_old_a))
 	{
 		return;
 	}
 
-	std::queue<CanvasNode*> q;
-	std::set<CanvasNode*> visited;
+	ff_queue.push(node);
+	ff_visited.insert(node);
+	ff_active = true;
+}
 
-	q.push(node);
-	visited.insert(node);
-
-	while(!q.empty() && !kill)
+bool Brush::flood_fill_step(int batch_size)
+{
+	if(!ff_active || kill)
 	{
-		CanvasNode* current = q.front();
-		q.pop();
+		ff_active = false;
+		return false;
+	}
+
+	std::chrono::milliseconds dura(10);
+	int processed = 0;
+
+	while(!ff_queue.empty() && !kill && processed < batch_size)
+	{
+		CanvasNode* current = ff_queue.front();
+		ff_queue.pop();
 
 		int r = current->getR(), g = current->getG(), b = current->getB();
 		float a = current->getA();
 
 		// Skip if already filled or color doesn't match
-		if(current->isVisible() && r == new_r && g == new_g && b == new_b && a == new_a)
+		if(current->isVisible() && r == ff_new_r && g == ff_new_g && b == ff_new_b && a == ff_new_a)
 		{
 			continue;
 		}
 
-		if(r == old_r && g == old_g && b == old_b && a == old_a)
+		if(r == ff_old_r && g == ff_old_g && b == ff_old_b && a == ff_old_a)
 		{
 			if(slowmode) { std::this_thread::sleep_for(dura); }
 
 			current->setVisible();
-			current->setColor(new_r, new_g, new_b, new_a);
+			current->setColor(ff_new_r, ff_new_g, ff_new_b, ff_new_a);
 
 			CanvasNode* neighbors[4] = {
 				current->getLink(DIRECTION::NORTH),
@@ -108,16 +110,36 @@ void Brush::flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, 
 			for(int i = 0; i < 4; i++)
 			{
 				CanvasNode* neighbor = neighbors[i];
-				if(neighbor != NULL && visited.find(neighbor) == visited.end())
+				if(neighbor != NULL && ff_visited.find(neighbor) == ff_visited.end())
 				{
-					visited.insert(neighbor);
-					q.push(neighbor);
+					ff_visited.insert(neighbor);
+					ff_queue.push(neighbor);
 				}
 			}
 		}
+		processed++;
 	}
-	return;
-} // Brush::flood_fill(CanvasNode* node)
+
+	if(ff_queue.empty() || kill)
+	{
+		ff_active = false;
+		return false;
+	}
+
+	return true;
+}
+
+bool Brush::is_filling() const
+{
+	return ff_active;
+}
+
+void Brush::cancel_fill()
+{
+	ff_active = false;
+	while(!ff_queue.empty()) ff_queue.pop();
+	ff_visited.clear();
+}
 
 void Brush::pixel(CanvasNode* node, float r, float g, float b, float a)
 {

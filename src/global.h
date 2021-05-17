@@ -72,6 +72,14 @@ extern bool x_key;
 /** Mouse coordinate location */
 extern float mouse_x, mouse_y;
 
+/** Flag for color picker hue drag */
+extern bool color_picking_hue;
+/** Flag for color picker SV drag */
+extern bool color_picking_sv;
+
+/** Constant window size for 1:1 aspect */
+extern const int WINDOW_SIZE;
+
 ///////////////////////////////////////////////////////
 //
 // Functions
@@ -209,5 +217,10 @@ void restoreProjection();
  * Draw the on-screen UI (info panel, color preview, help overlay).
  */
 void drawUI();
+
+/**
+ * Reshape callback to enforce 1:1 aspect ratio.
+ */
+void reshape(int w, int h);
 
 #endif // GLOBAL_H

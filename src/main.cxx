@@ -21,9 +21,10 @@ bool slowmode = false;
 
 Canvas* c = new Canvas();
 
+const int WINDOW_SIZE = 800;
 int main_window = 0;
-int window_width = 800;
-int window_height = 800;
+int window_width = WINDOW_SIZE;
+int window_height = WINDOW_SIZE;
 
 // KEY FLAGS
 bool mouse_active = false, mouse_left = false, mouse_right = false, x_key = false;
@@ -38,6 +39,17 @@ unsigned int hsv_hue = 180;
 float hsv_saturation = 1.0f;
 float hsv_value = 1.0f;
 bool show_help = false;
+
+// Color picker drag flags
+bool color_picking_hue = false;
+bool color_picking_sv = false;
+
+// Color picker bounds in normalized coords
+static const float HUE_BAR_Y = -1.0f;
+static const float HUE_BAR_HEIGHT = 0.06f;
+static const float SV_SIZE = 0.25f;
+static const float SV_X = 0.75f;
+static const float SV_Y = HUE_BAR_Y + HUE_BAR_HEIGHT + 0.02f;
 
 /******************************************************
  * 	MAIN
@@ -62,7 +74,6 @@ void init(int argc, char** argv)
     glutInit(&argc, argv); // pass in command line arguments
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
 
-
     // create the window object and tell glut to use it
     main_window = glutCreateWindow("Paint32");
     glutSetWindow(main_window);
@@ -72,25 +83,36 @@ void init(int argc, char** argv)
 
     // places the window and defines it's size
     glutPositionWindow(0,0);
-    glutReshapeWindow(window_width, window_height);
-
-	//glEnable(GL_LIGHT0);
-	//glEnable(GL_LIGHTING);
-	//glEnable(GL_DEPTH_TEST);
+    glutReshapeWindow(WINDOW_SIZE, WINDOW_SIZE);
 
 	glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 
     glutDisplayFunc(draw);
 	glutMouseFunc(mouse);
-	// glutMouseWheelFunc(mouse_w);
 	glutMotionFunc(mouse_m);
 	glutPassiveMotionFunc(mouse_p);
 	glutSpecialFunc(kb_s);
 	glutKeyboardFunc(kb);
 	glutKeyboardUpFunc(kb_up);
+	glutReshapeFunc(reshape);
 	glutIdleFunc(main_loop);
 
 } // void init(int argc, char** argv)
+
+void reshape(int w, int h)
+{
+	// Enforce 1:1 aspect ratio
+	int size = (w < h) ? w : h;
+	glutReshapeWindow(size, size);
+	window_width = size;
+	window_height = size;
+
+	glViewport(0, 0, size, size);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+}
 
 void draw()
 {
@@ -103,7 +125,6 @@ void draw()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	//glFrustum(-1,1,-1,1,2.0,20.0);
 	glMatrixMode(GL_MODELVIEW);
 
 	c->draw();
@@ -125,7 +146,7 @@ void update()
 	window_width = glutGet(GLUT_WINDOW_WIDTH);
 	window_height = glutGet(GLUT_WINDOW_HEIGHT);
 
-	if(mouse_active)
+	if(mouse_active && !color_picking_hue && !color_picking_sv)
 	{
 		place();
 	}
@@ -133,37 +154,58 @@ void update()
 
 void place()
 {
-	// while(true)
-	// {
-		if(!mouse_right && !x_key && mouse_active)
-		{
-			// printf("%d %d %d\n", rgb[0], rgb[1], rgb[2]);
-			// printf("%f %f\n", mouse_x, mouse_y);
-			c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
-		}
-		else if(mouse_right)
-		{
-			c->clear(mouse_x, mouse_y);
-		}
-	// }
+	if(!mouse_right && !x_key && mouse_active)
+	{
+		c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
+	}
+	else if(mouse_right)
+	{
+		c->clear(mouse_x, mouse_y);
+	}
 } // void place()
+
+// Convert pixel coordinates to normalized -1..1
+static float toNormX(int px) { return (2.0f * (float)px / (float)window_width) - 1.0f; }
+static float toNormY(int py) { return 1.0f - (2.0f * (float)py / (float)window_height); }
 
 void mouse(int button, int state, int x, int y)
 {
+	float nx = toNormX(x);
+	float ny = toNormY(y);
+
 	/* KEY PRESSES */
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
+		// Check if clicking on hue bar
+		if(ny >= HUE_BAR_Y && ny <= HUE_BAR_Y + HUE_BAR_HEIGHT && nx >= -1.0f && nx <= 1.0f)
+		{
+			color_picking_hue = true;
+			hsv_hue = (unsigned int)(((nx + 1.0f) / 2.0f) * 360.0f);
+			HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			return;
+		}
+
+		// Check if clicking on SV square
+		if(nx >= SV_X && nx <= SV_X + SV_SIZE && ny >= SV_Y && ny <= SV_Y + SV_SIZE)
+		{
+			color_picking_sv = true;
+			hsv_saturation = (nx - SV_X) / SV_SIZE;
+			hsv_value = (ny - SV_Y) / SV_SIZE;
+			HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			return;
+		}
+
 		mouse_active = true;
 		mouse_right = false;
-		mouse_x = (2*(float)x/window_width-1);
-		mouse_y = (2*(float)y/window_height-1)*-1;
+		mouse_x = nx;
+		mouse_y = ny;
 	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
 		mouse_active = true;
 		mouse_right = true;
-		mouse_x = (2*(float)x/window_width-1);
-		mouse_y = (2*(float)y/window_height-1)*-1;
+		mouse_x = nx;
+		mouse_y = ny;
 	}
 
 	/* KEY RELEASES */
@@ -171,15 +213,17 @@ void mouse(int button, int state, int x, int y)
 	{
 		mouse_active = false;
 		mouse_left = false;
-		mouse_x=0;
-		mouse_y=0;
+		color_picking_hue = false;
+		color_picking_sv = false;
+		mouse_x = 0;
+		mouse_y = 0;
 	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 	{
 		mouse_active = false;
 		mouse_right = false;
-		mouse_x=0;
-		mouse_y=0;
+		mouse_x = 0;
+		mouse_y = 0;
 	}
 	
 	/* MOUSE SCROLLING */
@@ -256,24 +300,58 @@ void mouse_w(int button, int dir, int x, int y)
 
 void mouse_m(int x, int y)
 {
-	mouse_x = (2*(float)x/window_width-1);
-	mouse_y = (2*(float)y/window_height-1)*-1;
+	float nx = toNormX(x);
+	float ny = toNormY(y);
+	mouse_x = nx;
+	mouse_y = ny;
 
-	if(x_key)
+	if(color_picking_hue)
 	{
-		hsv_hue = (mouse_x+1)*(360.0f/2);
+		hsv_hue = (unsigned int)(((nx + 1.0f) / 2.0f) * 360.0f);
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+	}
+	else if(color_picking_sv)
+	{
+		hsv_saturation = (nx - SV_X) / SV_SIZE;
+		hsv_value = (ny - SV_Y) / SV_SIZE;
+		if(hsv_saturation < 0.0f) hsv_saturation = 0.0f;
+		if(hsv_saturation > 1.0f) hsv_saturation = 1.0f;
+		if(hsv_value < 0.0f) hsv_value = 0.0f;
+		if(hsv_value > 1.0f) hsv_value = 1.0f;
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+	}
+	else if(x_key)
+	{
+		hsv_hue = (unsigned int)(((nx + 1.0f) / 2.0f) * 360.0f);
 		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
 	}
 }
 
 void mouse_p(int x, int y)
 {
-	mouse_x=2*(float)x/window_width-1;
-	mouse_y=(2*(float)y/window_height-1)*-1;
+	float nx = toNormX(x);
+	float ny = toNormY(y);
+	mouse_x = nx;
+	mouse_y = ny;
 
-	if(x_key)
+	if(color_picking_hue)
 	{
-		hsv_hue = (mouse_x+1)*(360.0f/2);
+		hsv_hue = (unsigned int)(((nx + 1.0f) / 2.0f) * 360.0f);
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+	}
+	else if(color_picking_sv)
+	{
+		hsv_saturation = (nx - SV_X) / SV_SIZE;
+		hsv_value = (ny - SV_Y) / SV_SIZE;
+		if(hsv_saturation < 0.0f) hsv_saturation = 0.0f;
+		if(hsv_saturation > 1.0f) hsv_saturation = 1.0f;
+		if(hsv_value < 0.0f) hsv_value = 0.0f;
+		if(hsv_value > 1.0f) hsv_value = 1.0f;
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+	}
+	else if(x_key)
+	{
+		hsv_hue = (unsigned int)(((nx + 1.0f) / 2.0f) * 360.0f);
 		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
 	}
 } // void mouse_m_f(int x, int y)
@@ -411,25 +489,32 @@ void drawUI()
 {
     setPixelProjection();
 
+    float pad = 10;
+
     // ---- Top-left info panel ----
     float panelW = 200;
     float panelH = 130;
-    float pad = 10;
-    drawRect(pad, window_height - panelH - pad, panelW, panelH, 0.1f, 0.1f, 0.1f, 0.75f);
+    // Clamp panel within window bounds
+    float panelX = pad;
+    float panelY = window_height - panelH - pad;
+    if(panelX + panelW > window_width - pad) panelX = window_width - panelW - pad;
+    if(panelY < pad) panelY = pad;
+
+    drawRect(panelX, panelY, panelW, panelH, 0.1f, 0.1f, 0.1f, 0.75f);
 
     // Draw border
     glColor4f(0.5f, 0.5f, 0.5f, 0.9f);
     glLineWidth(2.0f);
     glBegin(GL_LINE_LOOP);
-    glVertex2f(pad, window_height - panelH - pad);
-    glVertex2f(pad + panelW, window_height - panelH - pad);
-    glVertex2f(pad + panelW, window_height - pad);
-    glVertex2f(pad, window_height - pad);
+    glVertex2f(panelX, panelY);
+    glVertex2f(panelX + panelW, panelY);
+    glVertex2f(panelX + panelW, panelY + panelH);
+    glVertex2f(panelX, panelY + panelH);
     glEnd();
 
     float lineH = 18;
-    float tx = pad + 10;
-    float ty = window_height - pad - 20;
+    float tx = panelX + 10;
+    float ty = panelY + panelH - 20;
     void* font = GLUT_BITMAP_9_BY_15;
 
     char buf[128];
@@ -450,12 +535,22 @@ void drawUI()
     drawText(buf, tx, ty, font, 1.0f, 1.0f, 1.0f);
     ty -= lineH;
 
+    if(slowmode)
+    {
+        drawText("Slow Mode: ON", tx, ty, font, 1.0f, 0.7f, 0.3f);
+        ty -= lineH;
+    }
+
     drawText("Press H for help", tx, ty, font, 0.7f, 0.7f, 0.7f);
 
     // ---- Current color preview (top-right) ----
     float prevSize = 40;
     float px = window_width - prevSize - pad;
     float py = window_height - prevSize - pad;
+    // Clamp within bounds
+    if(px < pad) px = pad;
+    if(py < pad) py = pad;
+
     drawRect(px, py, prevSize, prevSize, 0.1f, 0.1f, 0.1f, 0.75f);
     drawRect(px + 2, py + 2, prevSize - 4, prevSize - 4, rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS, alpha);
     glColor4f(0.5f, 0.5f, 0.5f, 0.9f);
@@ -471,9 +566,15 @@ void drawUI()
     if (show_help)
     {
         float hw = 420;
-        float hh = 320;
+        float hh = 340;
         float hx = (window_width - hw) / 2;
         float hy = (window_height - hh) / 2;
+        // Clamp within bounds
+        if(hx < pad) hx = pad;
+        if(hy < pad) hy = pad;
+        if(hx + hw > window_width - pad) hx = window_width - hw - pad;
+        if(hy + hh > window_height - pad) hy = window_height - hh - pad;
+
         drawRect(hx, hy, hw, hh, 0.05f, 0.05f, 0.05f, 0.9f);
         glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
         glLineWidth(2.0f);
@@ -496,6 +597,8 @@ void drawUI()
         drawText("Scroll Wheel        - Change Hue", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
         drawText("Shift + Scroll      - Change Saturation", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
         drawText("Ctrl + Scroll       - Change Value", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Click Hue Bar       - Pick hue", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Click SV Square     - Pick saturation/value", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
         drawText("X + Move Mouse      - Pick color by position", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
         drawText("C                   - Clear canvas", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
         drawText("B                   - Bucket fill tool", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
