@@ -77,6 +77,9 @@ extern bool color_picking_hue;
 /** Flag for color picker SV drag */
 extern bool color_picking_sv;
 
+/** Flag to prevent repeated flood fill triggers */
+extern bool flood_fill_triggered;
+
 /** Constant window size for 1:1 aspect */
 extern const int WINDOW_SIZE;
 

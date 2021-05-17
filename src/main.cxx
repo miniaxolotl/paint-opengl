@@ -44,6 +44,9 @@ bool show_help = false;
 bool color_picking_hue = false;
 bool color_picking_sv = false;
 
+// Flood fill trigger guard
+bool flood_fill_triggered = false;
+
 // Color picker bounds in normalized coords
 static const float HUE_BAR_Y = -1.0f;
 static const float HUE_BAR_HEIGHT = 0.06f;
@@ -138,6 +141,7 @@ void draw()
 void main_loop()
 {
 	update();
+	c->update();
     glutPostRedisplay();
 } // void timer(int t)
 
@@ -156,7 +160,18 @@ void place()
 {
 	if(!mouse_right && !x_key && mouse_active)
 	{
-		c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
+		if(c->get_tool() == BRUSH_TYPE::FLOOD)
+		{
+			if(!flood_fill_triggered)
+			{
+				c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
+				flood_fill_triggered = true;
+			}
+		}
+		else
+		{
+			c->paint(mouse_x, mouse_y, rgb[0], rgb[1], rgb[2], alpha);
+		}
 	}
 	else if(mouse_right)
 	{
@@ -215,6 +230,7 @@ void mouse(int button, int state, int x, int y)
 		mouse_left = false;
 		color_picking_hue = false;
 		color_picking_sv = false;
+		flood_fill_triggered = false;
 		mouse_x = 0;
 		mouse_y = 0;
 	}
