@@ -1,7 +1,7 @@
-# Paint32
+# paint-opengl
 Simple paint application.
 
-- [Paint32](#paint32)
+- [paint-opengl](#paint-opengl)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 	- [Hotkeys](#hotkeys)
