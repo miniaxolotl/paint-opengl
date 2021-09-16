@@ -18,11 +18,11 @@ BUILD_DIR = build/
 
 LINKER_FLAGS = -lGLU -lGL -lglut -pthread
 LINKER_FLAGS_WINDOWS = -lglu32 -lopengl32 -lfreeglut
-CXX = clang++
+CXX = g++
 
 SOURCES = $(wildcard src/*.cxx) \
-       $(wildcard src/*/*.cxx) \
-       $(wildcard src/*/*/*.cxx)
+			$(wildcard src/*/*.cxx) \
+			$(wildcard src/*/*/*.cxx)
 
 TARGET = $(patsubst src/%.cxx,%.o,$(SOURCES))
 OBJS = $(addprefix $(OBJ_DIR), $(TARGET))
