@@ -11,7 +11,7 @@
 Object::Object()
 {
 	ID = objects;
-	objects+=objects;
+	objects++;
 } // Objects()
     
 Object::~Object()

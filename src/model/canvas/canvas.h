@@ -72,6 +72,12 @@ public:
 	 */
 	CanvasNode*** getGraph();
 
+	/**
+	 * Get the current brush type
+	 * @return Current brush type
+	 */
+	BRUSH_TYPE get_tool();
+
 	///////////////////////////
 	//	Setters
 	///////////////////////////

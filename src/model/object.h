@@ -25,7 +25,7 @@ public:
 	/**
 	 * Decrease object counter.
 	 */
-    ~Object();
+    virtual ~Object();
 
 	/**
 	 * Redraw the object.

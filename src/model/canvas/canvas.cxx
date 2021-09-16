@@ -11,6 +11,8 @@
 
 Canvas::Canvas() : Object::Object()
 {
+	brush_type = BRUSH_TYPE::PIXEL;
+
 	// Generate all nodes
 	graph = new CanvasNode**[width];
 	for(int i=0;i<width;i++)
