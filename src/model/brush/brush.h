@@ -32,13 +32,13 @@ public:
     void update();
 
 	/** Flood fill algorithim brush */
-	void flood_fill(CanvasNode* node, float r, float g, float b);
+	void flood_fill(CanvasNode* node, float r, float g, float b, float a);
 	/** Flood fill algorithim brush */
-	void flood_fill(CanvasNode* node, float r, float g, float b, float rn, float gn, float bn);
+	void flood_fill(CanvasNode* node, float r, float g, float b, float rn, float gn, float bn, float an);
 	/** Single pixel brush */
-	void pixel(CanvasNode* node, float r, float g, float b);
+	void pixel(CanvasNode* node, float r, float g, float b, float a);
 	/** Brush helper */
-	void pixel(CanvasNode* node, float r, float g, float b, int size);
+	void pixel(CanvasNode* node, float r, float g, float b, float a, int size);
 
 	///////////////////////////
 	//	Getters

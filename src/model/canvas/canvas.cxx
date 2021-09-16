@@ -94,7 +94,16 @@ Canvas::Canvas(int w, int h) : Object::Object()
 
 Canvas::~Canvas()
 {
-
+	// Free all nodes
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<height;j++)
+		{
+			delete graph[i][j];
+		}
+		delete[] graph[i];
+	}
+	delete[] graph;
 }
 
 void Canvas::draw()
@@ -128,16 +137,11 @@ void Canvas::update()
  
 void Canvas::color_bar()
 {
-	/* Viewport bounds */
-	float x0 = -1, x1 = 1, y0 = -1, y1 = 1;
-
 	/* RGB Values */
 	int rgb_val[3] = { 0, 0 ,0 };
-	// int q = width * 2;
 
 	for(int i=0;i<360;i++)
 	{
-		// HSVtoRGB(i*(360/q),1,1,rgb);
 		HSVtoRGB(i*6,rgb_val);
 		
 		double x0 = ((float)i/width)-1;
@@ -189,7 +193,7 @@ void Canvas::brush_indicator()
     }
 	glEnd();
 
-} // Canvas::update()
+} // Canvas::brush_indicator()
 
 void Canvas::background()
 {
@@ -251,11 +255,11 @@ void Canvas::paint(float x, float y, int r, int g, int b, float a)
 		switch (brush_type)
 		{
 			case BRUSH_TYPE::PIXEL:
-				brush.pixel(node,r,g,b);
+				brush.pixel(node,r,g,b,a);
 				break;
 
 			case BRUSH_TYPE::FLOOD:
-				brush.flood_fill(node,r,g,b);
+				brush.flood_fill(node,r,g,b,a);
 				break;
 
 			default:
@@ -305,4 +309,9 @@ CanvasNode*** Canvas::getGraph() {return graph; } // Canvas::getGraph()
 void Canvas::set_tool(BRUSH_TYPE type)
 {
 	brush_type = type;
+}
+
+BRUSH_TYPE Canvas::get_tool() const
+{
+	return brush_type;
 }

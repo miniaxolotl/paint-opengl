@@ -78,6 +78,8 @@ public:
 
 	/** Set the brush type */
 	void set_tool(BRUSH_TYPE type);
+	/** Get the brush type */
+	BRUSH_TYPE get_tool() const;
 	
 private:
 	/** Graph representation of a canvas */

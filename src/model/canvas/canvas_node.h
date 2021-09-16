@@ -82,9 +82,9 @@ public:
 	int getA() { return a; }
 private:
 	/** width of the node */
-	int width = 2/32;
+	static constexpr float node_size = 2.0f / 32.0f;
 	/** height of the node */
-	int height = width;
+	static constexpr float node_height = node_size;
 
 	/** North link */
 	CanvasNode* n;
