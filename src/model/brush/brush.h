@@ -34,7 +34,7 @@ public:
 	/** Flood fill algorithim brush */
 	void flood_fill(CanvasNode* node, float r, float g, float b, float a);
 	/** Flood fill algorithim brush */
-	void flood_fill(CanvasNode* node, float r, float g, float b, float rn, float gn, float bn, float an);
+	void flood_fill(CanvasNode* node, float old_r, float old_g, float old_b, float old_a, float new_r, float new_g, float new_b, float new_a);
 	/** Single pixel brush */
 	void pixel(CanvasNode* node, float r, float g, float b, float a);
 	/** Brush helper */

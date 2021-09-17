@@ -143,25 +143,6 @@ void Brush::pixel(CanvasNode* node, float r, float g, float b, float a, int size
 	}
 } // Brush::pixel(CanvasNode* node)
 
-void Brush::pixel(CanvasNode* node, float r, float g, float b, int size)
-{
-	if(node == NULL || size < 1)
-	{
-		return;
-	}
-	else
-	{
-		node->setColor(r,g,b);
-		node->setVisible();
-
-		pixel(node->getLink(DIRECTION::NORTH), r, g, b, size-1);
-		pixel(node->getLink(DIRECTION::EAST), r, g, b, size-1);
-		pixel(node->getLink(DIRECTION::SOUTH), r, g, b, size-1);
-		pixel(node->getLink(DIRECTION::WEST), r, g, b, size-1);
-
-	}
-} // Brush::pixel(CanvasNode* node)
-
 ///////////////////////////
 //	Getters
 ///////////////////////////
