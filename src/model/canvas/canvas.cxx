@@ -141,60 +141,64 @@ void Canvas::color_bar()
 {
 	/* RGB Values */
 	int rgb_val[3] = { 0, 0 ,0 };
+	float bar_height = 0.06f;
+	float bar_y = -1.0f;
 
+	// Draw hue bar
 	for(int i=0;i<360;i++)
 	{
-		HSVtoRGB(i*6,rgb_val);
+		HSVtoRGB(i, rgb_val, 1.0f, 1.0f);
 		
-		double x0 = ((float)i/width)-1;
-		double x1 = (((float)i/width)-1)+((float)1/width);
-		double y0 = ((float)1/height)-1;
-		double y1 = -1;
+		double x0 = ((double)i/360.0)*2.0 - 1.0;
+		double x1 = ((double)(i+1)/360.0)*2.0 - 1.0;
 
-		// Draw rainbow sliver
-		glColor3f(rgb_val[0]/COLORS,rgb_val[1]/COLORS,rgb_val[2]/COLORS);
+		glColor3f(rgb_val[0]/COLORS, rgb_val[1]/COLORS, rgb_val[2]/COLORS);
 		glBegin(GL_POLYGON);
-		glVertex2f(x0,y0);
-		glVertex2f(x1,y0);
-		glVertex2f(x1,y1);
-		glVertex2f(x0,y1);
-		glEnd();    
-	}
+		glVertex2f(x0, bar_y);
+		glVertex2f(x1, bar_y);
+		glVertex2f(x1, bar_y + bar_height);
+		glVertex2f(x0, bar_y + bar_height);
+	glEnd();
 }
 
 void Canvas::brush_indicator()
 {		 
-	/** radius of small indicator */
-	float radius = ( .03125 );
-	/** radius of large indicator */
-	float radius_contrast = radius+0.03125;
-	float x = -1+radius_contrast;
-	float y = -1+radius_contrast+((float)1/height);
-    float theta;
-
-	/* Background object */
-	glColor4f(rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS,0.3f);
-
-	glBegin(GL_POLYGON);
-
-	for(int i=0; i<16; i++)
+	if(!mouse_active)
 	{
-        theta = i*M_PI/8;
-        glVertex2f(radius_contrast*cos(theta)+x, radius_contrast*sin(theta)+y);
-    }
-	glEnd();
+		return;
+	}
 
-	/* Foreground object */
-	glColor4f(rgb[0]/COLORS,rgb[1]/COLORS,rgb[2]/COLORS,7.0f);
+	float radius = (0.03125f * pixel_size);
+	float radius_contrast = radius + 0.02f;
+	float theta;
 
+	glColor4f(1.0f - rgb[0]/COLORS, 1.0f - rgb[1]/COLORS, 1.0f - rgb[2]/COLORS, 0.5f);
 	glBegin(GL_POLYGON);
 	for(int i=0; i<16; i++)
 	{
-        theta = i*M_PI/8;
-        glVertex2f(radius*cos(theta)+x, radius*sin(theta)+y);
-    }
+		theta = i*M_PI/8;
+		glVertex2f(radius_contrast*cos(theta)+mouse_x, radius_contrast*sin(theta)+mouse_y);
+	}
 	glEnd();
 
+	glColor4f(rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS, 0.7f);
+	glBegin(GL_POLYGON);
+	for(int i=0; i<16; i++)
+	{
+		theta = i*M_PI/8;
+		glVertex2f(radius*cos(theta)+mouse_x, radius*sin(theta)+mouse_y);
+	}
+	glEnd();
+
+	glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
+	glLineWidth(1.5f);
+	glBegin(GL_LINE_LOOP);
+	for(int i=0; i<16; i++)
+	{
+		theta = i*M_PI/8;
+		glVertex2f(radius_contrast*cos(theta)+mouse_x, radius_contrast*sin(theta)+mouse_y);
+	}
+	glEnd();
 } // Canvas::brush_indicator()
 
 void Canvas::background()
@@ -245,30 +249,28 @@ void Canvas::background()
 
 void Canvas::paint(float x, float y, int r, int g, int b, float a)
 {
-	// Calculate node index in array.
 	int x_s = ((((x+1)/2)*width));
 	int y_s = ((((y+1)/2)*height));
 
 	if((x_s>=0 && x_s<width) && (y_s>=0 && y_s<height))
 	{
-		// Pointer to the specified node.
 		CanvasNode* node = graph[x_s][y_s];
 
 		switch (brush_type)
 		{
 			case BRUSH_TYPE::PIXEL:
-				brush.pixel(node,r,g,b,a);
+				brush.pixel(node, r, g, b, a);
 				break;
 
 			case BRUSH_TYPE::FLOOD:
-				brush.flood_fill(node,r,g,b,a);
+				brush.flood_fill(node, r, g, b, a);
 				break;
 
 			default:
 				break;
 		}
 	}
-} // Canvas::paint(float x, float y, unsigned short r, unsigned short g, unsigned short b)
+}
 
 void Canvas::clear(float x, float y)
 {
@@ -302,18 +304,6 @@ void Canvas::clear()
 ///////////////////////////
 
 /** Get the contained graph */
-CanvasNode*** Canvas::getGraph() {return graph; } // Canvas::getGraph()
+CanvasNode*** Canvas::getGraph() {return graph; }
 
-///////////////////////////
-//	Setters
-///////////////////////////
-
-void Canvas::set_tool(BRUSH_TYPE type)
-{
-	brush_type = type;
-}
-
-BRUSH_TYPE Canvas::get_tool() const
-{
-	return brush_type;
-}
+BRUSH_TYPE Canvas::get_tool() { return brush_type; }

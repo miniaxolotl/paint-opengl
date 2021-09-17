@@ -21,8 +21,6 @@
 #include <cmath>
 
 #include <iostream>
-#include <thread>
-#include <regex>
 
 ///////////////////////////////////////////////////////
 //
@@ -36,9 +34,6 @@ extern unsigned int objects;
 extern bool slowmode;
 /** thread kill switch */
 extern bool kill;
-
-/** Thread for handling terminal inputs */
-extern std::thread terminal_thread;
 
 /** Refrence to the main window */
 extern int main_window;
@@ -55,6 +50,15 @@ extern float alpha;
 extern int pixel_size;
 /** Colorspace */
 extern const float COLORS;
+
+/** HSV hue */
+extern unsigned int hsv_hue;
+/** HSV saturation */
+extern float hsv_saturation;
+/** HSV value */
+extern float hsv_value;
+/** Flag to show on-screen help */
+extern bool show_help;
 
 /** Left mouse button flag (Erase) */
 extern bool mouse_left;
@@ -167,8 +171,43 @@ void main_loop();
 void HSVtoRGB(int hue, int output[3], double saturation = 1, double value = 1);
 
 /**
- * Thread for handling terminal inputs.
+ * Draw text on screen at pixel coordinates.
+ * @param text String to draw.
+ * @param x Screen x coordinate (pixels from left).
+ * @param y Screen y coordinate (pixels from bottom).
+ * @param font GLUT bitmap font to use.
+ * @param r Red color (0-1).
+ * @param g Green color (0-1).
+ * @param b Blue color (0-1).
  */
-void terminal_thread_func();
+void drawText(const char* text, float x, float y, void* font, float r = 1.0f, float g = 1.0f, float b = 1.0f);
+
+/**
+ * Draw a filled rectangle in pixel coordinates.
+ * @param x Left coordinate.
+ * @param y Bottom coordinate.
+ * @param w Width.
+ * @param h Height.
+ * @param r Red (0-1).
+ * @param g Green (0-1).
+ * @param b Blue (0-1).
+ * @param a Alpha (0-1).
+ */
+void drawRect(float x, float y, float w, float h, float r, float g, float b, float a = 1.0f);
+
+/**
+ * Set up orthographic projection in pixel coordinates for UI drawing.
+ */
+void setPixelProjection();
+
+/**
+ * Restore previous projection after UI drawing.
+ */
+void restoreProjection();
+
+/**
+ * Draw the on-screen UI (info panel, color preview, help overlay).
+ */
+void drawUI();
 
 #endif // GLOBAL_H

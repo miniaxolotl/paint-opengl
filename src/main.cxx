@@ -9,7 +9,6 @@
  */
 #include "global.h"
 #include "model/canvas/canvas.h"
-#include <queue>
 
 /******************************************************
  * VARIABLES
@@ -19,11 +18,10 @@ unsigned int objects = 0;
 
 bool kill = false;
 bool slowmode = false;
-// std::thread paint_thread(place);
-std::queue<std::thread> paint_thread;
 
 Canvas* c = new Canvas();
 
+int main_window = 0;
 int window_width = 800;
 int window_height = 800;
 
@@ -37,6 +35,9 @@ float alpha = 1;
 int pixel_size = 1;
 const float COLORS = 255.0f;
 unsigned int hsv_hue = 180;
+float hsv_saturation = 1.0f;
+float hsv_value = 1.0f;
+bool show_help = false;
 
 /******************************************************
  * 	MAIN
@@ -63,7 +64,7 @@ void init(int argc, char** argv)
 
 
     // create the window object and tell glut to use it
-    int main_window = glutCreateWindow("Paint32");
+    main_window = glutCreateWindow("Paint32");
     glutSetWindow(main_window);
 
 	glEnable(GL_BLEND);
@@ -88,7 +89,6 @@ void init(int argc, char** argv)
 	glutKeyboardFunc(kb);
 	glutKeyboardUpFunc(kb_up);
 	glutIdleFunc(main_loop);
-	glutMainLoop();
 
 } // void init(int argc, char** argv)
 
@@ -107,6 +107,7 @@ void draw()
 	glMatrixMode(GL_MODELVIEW);
 
 	c->draw();
+	drawUI();
 
 	glLoadIdentity();
 
@@ -126,8 +127,7 @@ void update()
 
 	if(mouse_active)
 	{
-		// place();
-		paint_thread.push(std::thread(place));
+		place();
 	}
 } // void update()
 
@@ -183,22 +183,61 @@ void mouse(int button, int state, int x, int y)
 	}
 	
 	/* MOUSE SCROLLING */
-	// hue delta
 	float hsv_mod = (360/128);
-	if(button == 3) // scroll up
+	int mod = glutGetModifiers();
+	
+	if(button == 3)
 	{
-		if(hsv_hue + hsv_mod <= 360)
+		if(mod & GLUT_ACTIVE_SHIFT)
 		{
-			hsv_hue += hsv_mod;
-			HSVtoRGB(hsv_hue, rgb);
+			if(hsv_saturation + 0.05f <= 1.0f)
+			{
+				hsv_saturation += 0.05f;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
+		}
+		else if(mod & GLUT_ACTIVE_CTRL)
+		{
+			if(hsv_value + 0.05f <= 1.0f)
+			{
+				hsv_value += 0.05f;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
+		}
+		else
+		{
+			if(hsv_hue + hsv_mod <= 360)
+			{
+				hsv_hue += hsv_mod;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
 		}
 	}
-	else if(button == 4) // scroll down
+	else if(button == 4)
 	{		
-		if(hsv_hue - hsv_mod >= 0)
+		if(mod & GLUT_ACTIVE_SHIFT)
 		{
-			hsv_hue -= hsv_mod;
-			HSVtoRGB(hsv_hue, rgb);
+			if(hsv_saturation - 0.05f >= 0.0f)
+			{
+				hsv_saturation -= 0.05f;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
+		}
+		else if(mod & GLUT_ACTIVE_CTRL)
+		{
+			if(hsv_value - 0.05f >= 0.0f)
+			{
+				hsv_value -= 0.05f;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
+		}
+		else
+		{
+			if(hsv_hue - hsv_mod >= 0)
+			{
+				hsv_hue -= hsv_mod;
+				HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
+			}
 		}
 	}
 } // void mouse_f(int b, int s,int x, int y)
@@ -220,12 +259,12 @@ void mouse_m(int x, int y)
 	mouse_x = (2*(float)x/window_width-1);
 	mouse_y = (2*(float)y/window_height-1)*-1;
 
-	// if user is scrolling colors
 	if(x_key)
 	{
-		HSVtoRGB((mouse_x+1)*(360.0f/2), rgb);
+		hsv_hue = (mouse_x+1)*(360.0f/2);
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
 	}
-} // void mouse_m_f(int x, int y)
+}
 
 void mouse_p(int x, int y)
 {
@@ -234,7 +273,8 @@ void mouse_p(int x, int y)
 
 	if(x_key)
 	{
-		HSVtoRGB((mouse_x+1)*(360.0f/2), rgb);
+		hsv_hue = (mouse_x+1)*(360.0f/2);
+		HSVtoRGB(hsv_hue, rgb, hsv_saturation, hsv_value);
 	}
 } // void mouse_m_f(int x, int y)
 
@@ -301,6 +341,10 @@ void kb(unsigned char key, int x, int y)
 			pixel_size = 1;
 			break;
 
+		case 'h':
+			show_help = !show_help;
+			break;
+
 		default:
 			break;
 	}
@@ -323,21 +367,147 @@ void kb_up(unsigned char key, int x, int y)
 	}
 }
 
-void terminal_thread_func()
+void drawText(const char* text, float x, float y, void* font, float r, float g, float b)
 {
-	std::string input;
+    glColor3f(r, g, b);
+    glRasterPos2f(x, y);
+    for (const char* c = text; *c != '\0'; c++)
+    {
+        glutBitmapCharacter(font, *c);
+    }
+}
 
-	while(true)
-	{
-		printf("Input rgba values [0-255] [0-255] [0-255] [0-1]: ");
-		scanf ("%d",&rgb[0]);
-		scanf ("%d",&rgb[1]);
-		scanf ("%d",&rgb[2]);
-		scanf ("%f",&alpha);
-		
-    	getchar(); // clear input buffer on error 
-	}
-} // void terminal_thread_func()
+void drawRect(float x, float y, float w, float h, float r, float g, float b, float a)
+{
+    glColor4f(r, g, b, a);
+    glBegin(GL_POLYGON);
+    glVertex2f(x, y);
+    glVertex2f(x + w, y);
+    glVertex2f(x + w, y + h);
+    glVertex2f(x, y + h);
+    glEnd();
+}
+
+void setPixelProjection()
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, window_width, 0, window_height);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+}
+
+void restoreProjection()
+{
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
+void drawUI()
+{
+    setPixelProjection();
+
+    // ---- Top-left info panel ----
+    float panelW = 200;
+    float panelH = 130;
+    float pad = 10;
+    drawRect(pad, window_height - panelH - pad, panelW, panelH, 0.1f, 0.1f, 0.1f, 0.75f);
+
+    // Draw border
+    glColor4f(0.5f, 0.5f, 0.5f, 0.9f);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(pad, window_height - panelH - pad);
+    glVertex2f(pad + panelW, window_height - panelH - pad);
+    glVertex2f(pad + panelW, window_height - pad);
+    glVertex2f(pad, window_height - pad);
+    glEnd();
+
+    float lineH = 18;
+    float tx = pad + 10;
+    float ty = window_height - pad - 20;
+    void* font = GLUT_BITMAP_9_BY_15;
+
+    char buf[128];
+    const char* toolName = (c->get_tool() == BRUSH_TYPE::PIXEL) ? "Pixel" : "Bucket";
+    snprintf(buf, sizeof(buf), "Tool: %s", toolName);
+    drawText(buf, tx, ty, font, 1.0f, 1.0f, 1.0f);
+    ty -= lineH;
+
+    snprintf(buf, sizeof(buf), "Brush Size: %d", pixel_size);
+    drawText(buf, tx, ty, font, 1.0f, 1.0f, 1.0f);
+    ty -= lineH;
+
+    snprintf(buf, sizeof(buf), "RGB: %d, %d, %d", rgb[0], rgb[1], rgb[2]);
+    drawText(buf, tx, ty, font, rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS);
+    ty -= lineH;
+
+    snprintf(buf, sizeof(buf), "HSV: %d, %d%%, %d%%", hsv_hue, (int)(hsv_saturation*100), (int)(hsv_value*100));
+    drawText(buf, tx, ty, font, 1.0f, 1.0f, 1.0f);
+    ty -= lineH;
+
+    drawText("Press H for help", tx, ty, font, 0.7f, 0.7f, 0.7f);
+
+    // ---- Current color preview (top-right) ----
+    float prevSize = 40;
+    float px = window_width - prevSize - pad;
+    float py = window_height - prevSize - pad;
+    drawRect(px, py, prevSize, prevSize, 0.1f, 0.1f, 0.1f, 0.75f);
+    drawRect(px + 2, py + 2, prevSize - 4, prevSize - 4, rgb[0]/COLORS, rgb[1]/COLORS, rgb[2]/COLORS, alpha);
+    glColor4f(0.5f, 0.5f, 0.5f, 0.9f);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(px, py);
+    glVertex2f(px + prevSize, py);
+    glVertex2f(px + prevSize, py + prevSize);
+    glVertex2f(px, py + prevSize);
+    glEnd();
+
+    // ---- Help overlay ----
+    if (show_help)
+    {
+        float hw = 420;
+        float hh = 320;
+        float hx = (window_width - hw) / 2;
+        float hy = (window_height - hh) / 2;
+        drawRect(hx, hy, hw, hh, 0.05f, 0.05f, 0.05f, 0.9f);
+        glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
+        glLineWidth(2.0f);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(hx, hy);
+        glVertex2f(hx + hw, hy);
+        glVertex2f(hx + hw, hy + hh);
+        glVertex2f(hx, hy + hh);
+        glEnd();
+
+        float htx = hx + 20;
+        float hty = hy + hh - 30;
+        void* hfont = GLUT_BITMAP_HELVETICA_18;
+        drawText("Controls", htx, hty, hfont, 1.0f, 0.8f, 0.3f);
+        hty -= 28;
+
+        hfont = GLUT_BITMAP_9_BY_15;
+        drawText("Left Click          - Paint", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Right Click         - Erase", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Scroll Wheel        - Change Hue", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Shift + Scroll      - Change Saturation", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("Ctrl + Scroll       - Change Value", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("X + Move Mouse      - Pick color by position", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("C                   - Clear canvas", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("B                   - Bucket fill tool", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("V                   - Pixel brush tool", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("+ / -               - Increase / Decrease brush", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("=                   - Reset brush size", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("S                   - Toggle slow fill mode", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+        drawText("H                   - Toggle this help", htx, hty, hfont, 1.0f, 1.0f, 1.0f); hty -= 20;
+    }
+
+    restoreProjection();
+}
 
 void HSVtoRGB(int H, int output[3],double S, double V) {
 	double C = S * V;
